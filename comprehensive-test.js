@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Comprehensive Test Suite for SigParser with NLP-Enhanced Fallback
+ * Comprehensive Test Suite for Intelligent Medication Sig Parser with NLP
  *
  * This test suite includes:
  * - Extensive edge cases (100+ test cases)

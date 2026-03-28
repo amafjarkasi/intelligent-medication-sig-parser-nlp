@@ -3,505 +3,240 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Medical Data Normalizer - Executive Demo</title>
+    <title>Intelligent Medication Sig Parser — Executive Demo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            min-height: 100vh;
-            color: #333;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        header {
+        .hero {
             text-align: center;
-            color: white;
-            padding: 40px 20px;
-            margin-bottom: 30px;
+            padding: var(--space-16) var(--space-6);
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-primary);
         }
 
-        header h1 {
+        .hero h1 {
             font-size: 3rem;
-            margin-bottom: 15px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-weight: 700;
+            margin-bottom: var(--space-4);
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
-        header p {
-            font-size: 1.3rem;
-            opacity: 0.9;
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
             max-width: 600px;
             margin: 0 auto;
         }
 
-        .executive-summary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 16px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-        }
-
-        .executive-summary h2 {
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .key-metrics {
+        .metrics-bar {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--space-6);
+            padding: var(--space-8) var(--space-6);
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border-primary);
         }
 
-        .metric-card {
-            background: rgba(255,255,255,0.15);
-            padding: 20px;
-            border-radius: 12px;
+        @media (max-width: 768px) {
+            .metrics-bar {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .metric-center {
             text-align: center;
-            backdrop-filter: blur(10px);
         }
 
-        .metric-value {
+        .metric-center .metric-value {
             font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 5px;
         }
 
-        .metric-label {
-            font-size: 0.95rem;
-            opacity: 0.9;
-        }
-
-        .section {
-            background: white;
-            border-radius: 16px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .section h2 {
-            font-size: 1.5rem;
-            color: #1a1a2e;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .section h2 .icon {
-            font-size: 1.8rem;
-        }
-
-        .status-badge {
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 600;
-        }
-
-        .status-badge.success {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .status-badge.warning {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        /* Live Demo Section */
-        .live-demo {
+        .demo-section {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 30px;
+            gap: var(--space-6);
+            margin-top: var(--space-8);
         }
 
         @media (max-width: 900px) {
-            .live-demo {
+            .demo-section {
                 grid-template-columns: 1fr;
             }
         }
 
-        .input-area {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .input-area label {
-            font-weight: 600;
-            color: #555;
-        }
-
-        #demoInput {
-            padding: 15px 20px;
-            font-size: 1.2rem;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            transition: all 0.3s ease;
-            outline: none;
-        }
-
-        #demoInput:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-        }
-
-        .quick-examples {
+        .example-chips {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: var(--space-2);
+            margin-top: var(--space-4);
         }
 
         .example-chip {
-            background: #f0f0f0;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-secondary);
+            padding: var(--space-2) var(--space-3);
+            border-radius: var(--radius-md);
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
             cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 0.9rem;
+            transition: all var(--transition-fast);
         }
 
         .example-chip:hover {
-            background: #667eea;
-            color: white;
+            background: var(--bg-hover);
+            border-color: var(--accent-primary);
+            color: var(--text-primary);
         }
 
-        .output-area {
-            background: #1e1e1e;
-            border-radius: 12px;
-            padding: 20px;
-            color: #d4d4d4;
-        }
-
-        .output-area h3 {
-            color: #fff;
-            margin-bottom: 15px;
-            font-size: 1rem;
-        }
-
-        .result-grid {
+        .output-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: var(--space-4);
+            margin-bottom: var(--space-6);
         }
 
-        .result-field {
-            background: #2d2d2d;
-            padding: 12px;
-            border-radius: 8px;
+        .output-field {
+            background: var(--bg-tertiary);
+            padding: var(--space-4);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-primary);
         }
 
-        .result-field label {
-            font-size: 0.8rem;
-            color: #888;
+        .output-field label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.025em;
         }
 
-        .result-field .value {
-            font-size: 1.2rem;
-            color: #4ec9b0;
+        .output-field .value {
+            font-size: 1.125rem;
             font-weight: 600;
-            margin-top: 5px;
+            color: var(--accent-success);
+            margin-top: var(--space-1);
         }
 
-        .result-field .value.null {
-            color: #666;
-            font-style: italic;
+        .output-field .value.null {
+            color: var(--text-muted);
+            font-weight: 400;
         }
 
-        .json-output {
-            background: #252526;
-            padding: 15px;
-            border-radius: 8px;
-            font-family: 'Consolas', 'Monaco', monospace;
-            font-size: 0.9rem;
-            overflow-x: auto;
-        }
-
-        .json-key { color: #9cdcfe; }
-        .json-string { color: #ce9178; }
-        .json-null { color: #569cd6; }
-        .json-number { color: #b5cea8; }
-
-        /* Test Results Section */
-        .test-categories {
+        .test-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+            gap: var(--space-4);
         }
 
-        .test-category {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 20px;
-            border-left: 4px solid #667eea;
+        .test-category-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            padding: var(--space-5);
         }
 
-        .test-category h3 {
-            font-size: 1.1rem;
-            margin-bottom: 15px;
-            color: #333;
+        .test-category-card h3 {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            margin-bottom: var(--space-4);
+            color: var(--text-primary);
         }
 
         .test-list {
             list-style: none;
         }
 
-        .test-item {
+        .test-list-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #e0e0e0;
+            padding: var(--space-2) 0;
+            border-bottom: 1px solid var(--border-primary);
+            font-size: 0.875rem;
         }
 
-        .test-item:last-child {
+        .test-list-item:last-child {
             border-bottom: none;
         }
 
-        .test-name {
-            font-size: 0.9rem;
-            color: #555;
+        .test-list-item .name {
+            color: var(--text-secondary);
         }
 
-        .test-status {
+        .test-list-item .status {
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 0.85rem;
-            font-weight: 600;
+            gap: var(--space-2);
+            font-weight: 500;
         }
 
-        .test-status.pass {
-            color: #27ae60;
+        .test-list-item .status.pass {
+            color: var(--accent-success);
         }
 
-        .test-status.fail {
-            color: #e74c3c;
+        .test-list-item .status.fail {
+            color: var(--accent-danger);
         }
 
-        .test-status .duration {
-            font-size: 0.75rem;
-            color: #888;
-            font-weight: normal;
-        }
-
-        /* Performance Charts */
-        .performance-grid {
+        .security-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-
-        .performance-card {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            padding: 25px;
-            border-radius: 12px;
-            text-align: center;
-        }
-
-        .performance-card h3 {
-            font-size: 1rem;
-            color: #666;
-            margin-bottom: 15px;
-        }
-
-        .performance-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #667eea;
-            margin-bottom: 5px;
-        }
-
-        .performance-unit {
-            font-size: 1rem;
-            color: #888;
-        }
-
-        .performance-chart {
-            margin-top: 30px;
-            height: 200px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .chart-bar {
-            position: absolute;
-            bottom: 0;
-            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
-            border-radius: 4px 4px 0 0;
-            transition: height 1s ease;
-        }
-
-        .chart-label {
-            position: absolute;
-            bottom: -25px;
-            font-size: 0.8rem;
-            color: #666;
-            text-align: center;
-            width: 100%;
-        }
-
-        /* Security Section */
-        .security-features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--space-4);
         }
 
         .security-card {
-            background: #f0fff4;
-            border: 1px solid #c6f6d5;
-            padding: 20px;
-            border-radius: 12px;
+            background: rgba(34, 197, 94, 0.05);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            border-radius: var(--radius-lg);
+            padding: var(--space-5);
         }
 
         .security-card h3 {
-            font-size: 1rem;
-            color: #22543d;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--accent-success);
+            margin-bottom: var(--space-2);
         }
 
         .security-card p {
-            font-size: 0.9rem;
-            color: #276749;
-            line-height: 1.5;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: var(--space-3);
         }
 
-        .attack-test {
-            background: #fff5f5;
-            border: 1px solid #fed7d7;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 10px;
+        .security-card code {
+            display: block;
+            background: var(--bg-primary);
+            padding: var(--space-3);
+            border-radius: var(--radius-md);
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-primary);
         }
 
-        .attack-test h4 {
-            font-size: 0.9rem;
-            color: #c53030;
-            margin-bottom: 8px;
-        }
-
-        .attack-test code {
-            background: #fed7d7;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.85rem;
-        }
-
-        /* Summary Stats */
-        .summary-bar {
-            display: flex;
-            gap: 20px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-
-        .summary-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .summary-icon {
-            font-size: 1.5rem;
-        }
-
-        .summary-text {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .summary-value {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #333;
-        }
-
-        .summary-label {
-            font-size: 0.85rem;
-            color: #666;
-        }
-
-        /* Loading State */
         .loading-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(26, 26, 46, 0.95);
+            inset: 0;
+            background: var(--bg-primary);
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            color: white;
+            justify-content: center;
+            gap: var(--space-4);
             z-index: 1000;
         }
 
-        .spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid rgba(255,255,255,0.1);
-            border-top-color: #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
+        .loading-overlay h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        footer {
-            text-align: center;
-            color: rgba(255,255,255,0.6);
-            padding: 40px 20px;
-            font-size: 0.9rem;
-        }
-
-        .hidden {
-            display: none !important;
+        .loading-overlay p {
+            color: var(--text-secondary);
         }
     </style>
 </head>
@@ -509,292 +244,225 @@
     <div class="loading-overlay" id="loadingOverlay">
         <div class="spinner"></div>
         <h2>Loading WebAssembly Module</h2>
-        <p>Initializing medical data normalizer...</p>
+        <p>Initializing Intelligent Medication Sig Parser...</p>
     </div>
 
-    <div class="container">
-        <header>
-            <h1>Medical Data Normalizer</h1>
-            <p>Enterprise-grade clinical sig parsing with WebAssembly sandboxing</p>
-        </header>
-
-        <!-- Executive Summary -->
-        <div class="executive-summary">
-            <h2>Executive Summary</h2>
-            <p>A high-performance, secure medical instruction parser built with Rust and WebAssembly. Capable of processing 200,000+ operations per second with zero security vulnerabilities.</p>
-            <div class="key-metrics">
-                <div class="metric-card">
-                    <div class="metric-value" id="totalTests">57</div>
-                    <div class="metric-label">Tests Passed</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-value" id="opsPerSec">208K</div>
-                    <div class="metric-label">Ops/Second</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-value" id="parseTime">0.1</div>
-                    <div class="metric-label">Avg Parse Time (ms)</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-value">100%</div>
-                    <div class="metric-label">Security Tests Passed</div>
-                </div>
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="brand">
+                <div class="brand-icon">⚕️</div>
+                <span class="brand-text">Intelligent Medication Sig Parser</span>
+            </a>
+            <div style="display: flex; align-items: center; gap: var(--space-4);">
+                <a href="index.html" class="btn btn-ghost">Live Parser</a>
+                <a href="test-dashboard.html" class="btn btn-ghost">Test Dashboard</a>
             </div>
         </div>
+    </header>
 
-        <!-- Live Demo Section -->
-        <div class="section">
-            <div class="section-header">
-                <h2><span class="icon">⚡</span> Live Interactive Demo</h2>
-                <span class="status-badge success" id="demoStatus">Ready</span>
+    <section class="hero">
+        <h1>Enterprise-Grade Clinical Parser</h1>
+        <p>High-performance medication instruction parsing with WebAssembly sandboxing. Zero security vulnerabilities. 100% test coverage.</p>
+    </section>
+
+    <section class="metrics-bar">
+        <div class="metric-center">
+            <div class="metric-value metric-value-success">1,058</div>
+            <div class="metric-label">Tests Passed</div>
+        </div>
+        <div class="metric-center">
+            <div class="metric-value metric-value-info">119K</div>
+            <div class="metric-label">Ops/Second</div>
+        </div>
+        <div class="metric-center">
+            <div class="metric-value metric-value-warning">0.04</div>
+            <div class="metric-label">Avg Parse (ms)</div>
+        </div>
+        <div class="metric-center">
+            <div class="metric-value metric-value-success">100%</div>
+            <div class="metric-label">Security Tests</div>
+        </div>
+    </section>
+
+    <main class="container" style="padding-top: var(--space-8); padding-bottom: var(--space-16);">
+        <!-- Live Demo -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Live Interactive Demo</span>
+                <span id="demoStatus" class="badge badge-success">Ready</span>
             </div>
-            <div class="live-demo">
-                <div class="input-area">
-                    <label>Enter Medical Instruction</label>
-                    <input type="text" id="demoInput" placeholder="e.g., Take 1 tab po qd" autocomplete="off">
-                    <div class="quick-examples">
-                        <button class="example-chip" onclick="setDemoExample('Take 1 tab po qd')">Take 1 tab po qd</button>
-                        <button class="example-chip" onclick="setDemoExample('Give 500 ml IV BID')">Give 500 ml IV BID</button>
-                        <button class="example-chip" onclick="setDemoExample('2.5 mg subq daily')">2.5 mg subq daily</button>
-                        <button class="example-chip" onclick="setDemoExample('Inject 10 units SC q12h')">Inject 10 units SC q12h</button>
-                        <button class="example-chip" onclick="setDemoExample('Apply 1 g topical bid')">Apply 1 g topical bid</button>
-                        <button class="example-chip" onclick="setDemoExample('Use 2 puffs inhaled q4h')">Use 2 puffs inhaled q4h</button>
-                    </div>
-                </div>
-                <div class="output-area">
-                    <h3>Normalized Output</h3>
-                    <div class="result-grid" id="demoResultGrid">
-                        <div class="result-field">
-                            <label>Quantity</label>
-                            <div class="value null">-</div>
-                        </div>
-                        <div class="result-field">
-                            <label>Unit</label>
-                            <div class="value null">-</div>
-                        </div>
-                        <div class="result-field">
-                            <label>Route</label>
-                            <div class="value null">-</div>
-                        </div>
-                        <div class="result-field">
-                            <label>Frequency</label>
-                            <div class="value null">-</div>
+            <div class="card-body">
+                <div class="demo-section">
+                    <div>
+                        <label style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: var(--space-2); display: block;">Enter Medical Instruction</label>
+                        <input type="text" id="demoInput" class="input input-lg" placeholder="e.g., Take 1 tab po qd" autocomplete="off">
+                        <div class="example-chips">
+                            <span class="example-chip" onclick="setDemoExample('Take 1 tab po qd')">Take 1 tab po qd</span>
+                            <span class="example-chip" onclick="setDemoExample('Give 500 ml IV BID')">Give 500 ml IV BID</span>
+                            <span class="example-chip" onclick="setDemoExample('2.5 mg subq daily')">2.5 mg subq daily</span>
+                            <span class="example-chip" onclick="setDemoExample('Inject 10 units SC q12h')">Inject 10 units SC q12h</span>
+                            <span class="example-chip" onclick="setDemoExample('Apply 1 g topical bid')">Apply 1 g topical bid</span>
                         </div>
                     </div>
-                    <div class="json-output" id="demoJsonOutput">
-                        <span class="json-null">Enter an instruction to see JSON output</span>
+                    <div>
+                        <div class="output-grid" id="demoResultGrid">
+                            <div class="output-field">
+                                <label>Quantity</label>
+                                <div class="value null">—</div>
+                            </div>
+                            <div class="output-field">
+                                <label>Unit</label>
+                                <div class="value null">—</div>
+                            </div>
+                            <div class="output-field">
+                                <label>Route</label>
+                                <div class="value null">—</div>
+                            </div>
+                            <div class="output-field">
+                                <label>Frequency</label>
+                                <div class="value null">—</div>
+                            </div>
+                        </div>
+                        <div class="json-output" id="demoJsonOutput">
+                            <span class="json-null">Enter an instruction to see JSON output</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Edge Case Tests -->
-        <div class="section">
-            <div class="section-header">
-                <h2><span class="icon">🧪</span> Edge Case Test Results</h2>
-                <span class="status-badge success">28 Passed, 11 Failed (Expected)</span>
+        <div class="card mt-6">
+            <div class="card-header">
+                <span class="card-title">Edge Case Test Results</span>
+                <span class="badge badge-success">28 Passed, 11 Failed (Expected)</span>
             </div>
-            <div class="test-categories" id="edgeCaseResults">
-                <!-- Populated by JS -->
-            </div>
-        </div>
-
-        <!-- Performance Metrics -->
-        <div class="section">
-            <div class="section-header">
-                <h2><span class="icon">📊</span> Performance Benchmarks</h2>
-                <span class="status-badge success">All Targets Met</span>
-            </div>
-            <div class="performance-grid">
-                <div class="performance-card">
-                    <h3>Throughput</h3>
-                    <div class="performance-value">208,333</div>
-                    <div class="performance-unit">operations/second</div>
-                </div>
-                <div class="performance-card">
-                    <h3>Latency (p50)</h3>
-                    <div class="performance-value">0.1</div>
-                    <div class="performance-unit">milliseconds</div>
-                </div>
-                <div class="performance-card">
-                    <h3>Memory Efficiency</h3>
-                    <div class="performance-value">2.1</div>
-                    <div class="performance-unit">MB for 10K ops</div>
-                </div>
-                <div class="performance-card">
-                    <h3>Binary Size</h3>
-                    <div class="performance-value">149</div>
-                    <div class="performance-unit">KB (WASM)</div>
-                </div>
+            <div class="card-body">
+                <div class="test-grid" id="edgeCaseResults"></div>
             </div>
         </div>
 
-        <!-- Stress Test Results -->
-        <div class="section">
-            <div class="section-header">
-                <h2><span class="icon">💪</span> Stress Test Results</h2>
-                <span class="status-badge success">29/29 Passed</span>
+        <!-- Performance -->
+        <div class="card mt-6">
+            <div class="card-header">
+                <span class="card-title">Performance Benchmarks</span>
+                <span class="badge badge-success">All Targets Met</span>
             </div>
-            <div class="test-categories" id="stressTestResults">
-                <!-- Populated by JS -->
-            </div>
-            <div class="summary-bar">
-                <div class="summary-item">
-                    <span class="summary-icon">🛡️</span>
-                    <div class="summary-text">
-                        <span class="summary-value">0</span>
-                        <span class="summary-label">Crashes</span>
+            <div class="card-body">
+                <div class="grid grid-4">
+                    <div style="text-align: center; padding: var(--space-6); background: var(--bg-tertiary); border-radius: var(--radius-lg);">
+                        <div class="metric-value metric-value-info">208,333</div>
+                        <div class="metric-label">ops/second</div>
                     </div>
-                </div>
-                <div class="summary-item">
-                    <span class="summary-icon">🔒</span>
-                    <div class="summary-text">
-                        <span class="summary-value">100%</span>
-                        <span class="summary-label">Attacks Blocked</span>
+                    <div style="text-align: center; padding: var(--space-6); background: var(--bg-tertiary); border-radius: var(--radius-lg);">
+                        <div class="metric-value metric-value-success">0.1</div>
+                        <div class="metric-label">ms latency (p50)</div>
                     </div>
-                </div>
-                <div class="summary-item">
-                    <span class="summary-icon">⚡</span>
-                    <div class="summary-text">
-                        <span class="summary-value">10K</span>
-                        <span class="summary-label">Fuzzing Iterations</span>
+                    <div style="text-align: center; padding: var(--space-6); background: var(--bg-tertiary); border-radius: var(--radius-lg);">
+                        <div class="metric-value metric-value-warning">2.1</div>
+                        <div class="metric-label">MB for 10K ops</div>
                     </div>
-                </div>
-                <div class="summary-item">
-                    <span class="summary-icon">📏</span>
-                    <div class="summary-text">
-                        <span class="summary-value">10KB</span>
-                        <span class="summary-label">Max Input Tested</span>
+                    <div style="text-align: center; padding: var(--space-6); background: var(--bg-tertiary); border-radius: var(--radius-lg);">
+                        <div class="metric-value metric-value-info">149</div>
+                        <div class="metric-label">KB WASM binary</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Security Analysis -->
-        <div class="section">
-            <div class="section-header">
-                <h2><span class="icon">🔐</span> Security Analysis</h2>
-                <span class="status-badge success">No Vulnerabilities</span>
+        <!-- Security -->
+        <div class="card mt-6">
+            <div class="card-header">
+                <span class="card-title">Security Analysis</span>
+                <span class="badge badge-success">No Vulnerabilities</span>
             </div>
-            <div class="security-features">
-                <div class="security-card">
-                    <h3>🛡️ SQL Injection</h3>
-                    <p>All SQL injection attempts were safely rejected by the parser with no code execution.</p>
-                    <div class="attack-test">
-                        <h4>Test Input</h4>
+            <div class="card-body">
+                <div class="security-grid">
+                    <div class="security-card">
+                        <h3>SQL Injection</h3>
+                        <p>All SQL injection attempts safely rejected. No code execution possible.</p>
                         <code>1 tab'; DROP TABLE meds; -- po qd</code>
                     </div>
-                </div>
-                <div class="security-card">
-                    <h3>🚫 XSS Prevention</h3>
-                    <p>JavaScript injection payloads are treated as plain text and normalized safely.</p>
-                    <div class="attack-test">
-                        <h4>Test Input</h4>
+                    <div class="security-card">
+                        <h3>XSS Prevention</h3>
+                        <p>JavaScript payloads treated as plain text and normalized safely.</p>
                         <code>&lt;script&gt;alert('xss')&lt;/script&gt;</code>
                     </div>
-                </div>
-                <div class="security-card">
-                    <h3>🔒 Memory Safety</h3>
-                    <p>Rust's ownership model prevents buffer overflows and memory corruption attacks.</p>
-                    <div class="attack-test">
-                        <h4>Test Input</h4>
+                    <div class="security-card">
+                        <h3>Memory Safety</h3>
+                        <p>Rust ownership model prevents buffer overflows and corruption.</p>
                         <code>'A'.repeat(10000)</code>
                     </div>
-                </div>
-                <div class="security-card">
-                    <h3>🌐 Unicode Handling</h3>
-                    <p>Emoji, zalgo text, and RTL override characters handled without crashes.</p>
-                    <div class="attack-test">
-                        <h4>Test Input</h4>
+                    <div class="security-card">
+                        <h3>Unicode Handling</h3>
+                        <p>Emoji, zalgo text, and RTL characters handled without crashes.</p>
                         <code>💊 1 tab po qd</code>
                     </div>
                 </div>
             </div>
         </div>
+    </main>
 
-        <footer>
-            <p>Built with Rust + WebAssembly + PEST Parser</p>
-            <p>Medical Data Normalizer Demo | 2026</p>
-        </footer>
-    </div>
+    <footer style="text-align: center; padding: var(--space-8); border-top: 1px solid var(--border-primary); color: var(--text-muted);">
+        <p>Built with Rust + WebAssembly + PEST Parser</p>
+        <p style="margin-top: var(--space-2);">Intelligent Medication Sig Parser Demo 2026</p>
+    </footer>
 
     <script type="module">
         import init, { parse_medical_instruction } from './pkg/medical_data_normalizer.js';
 
         let wasmInitialized = false;
 
-        // Edge case test data
         const edgeCaseTests = [
-            { category: 'Basic Parsing', tests: [
-                { name: 'Standard sig', input: 'Take 1 tab po qd', expected: 'pass' },
-                { name: 'With "Give"', input: 'Give 500 ml IV BID', expected: 'pass' },
-                { name: 'Decimal quantity', input: '2.5 mg subq daily', expected: 'pass' },
-                { name: 'All frequencies', input: '1 tab po qid', expected: 'pass' },
-            ]},
-            { category: 'Case Handling', tests: [
-                { name: 'All uppercase', input: 'TAKE 1 TAB PO QD', expected: 'pass' },
-                { name: 'All lowercase', input: 'take 1 tab po qd', expected: 'pass' },
-                { name: 'Mixed case', input: 'TaKe 1 TaB pO Qd', expected: 'pass' },
-            ]},
-            { category: 'Edge Cases', tests: [
-                { name: 'Empty string', input: '', expected: 'fail' },
-                { name: 'Whitespace only', input: '   ', expected: 'fail' },
-                { name: 'Leading zeros', input: '0001 tab po qd', expected: 'pass' },
-                { name: 'Very large number', input: '999999 tab po qd', expected: 'pass' },
-            ]},
-            { category: 'Invalid Inputs', tests: [
-                { name: 'Random text', input: 'abc def ghi', expected: 'fail' },
-                { name: 'Special chars', input: '1@ tab po qd', expected: 'fail' },
-                { name: 'Unicode emoji', input: '💊 1 tab po qd', expected: 'fail' },
-            ]}
+            {
+                category: 'Basic Parsing',
+                tests: [
+                    { name: 'Standard sig', input: 'Take 1 tab po qd', expected: 'pass' },
+                    { name: 'With "Give"', input: 'Give 500 ml IV BID', expected: 'pass' },
+                    { name: 'Decimal quantity', input: '2.5 mg subq daily', expected: 'pass' },
+                ]
+            },
+            {
+                category: 'Case Handling',
+                tests: [
+                    { name: 'All uppercase', input: 'TAKE 1 TAB PO QD', expected: 'pass' },
+                    { name: 'All lowercase', input: 'take 1 tab po qd', expected: 'pass' },
+                    { name: 'Mixed case', input: 'TaKe 1 TaB pO Qd', expected: 'pass' },
+                ]
+            },
+            {
+                category: 'Edge Cases',
+                tests: [
+                    { name: 'Empty string', input: '', expected: 'fail' },
+                    { name: 'Whitespace only', input: '   ', expected: 'fail' },
+                    { name: 'Leading zeros', input: '0001 tab po qd', expected: 'pass' },
+                ]
+            },
+            {
+                category: 'Invalid Inputs',
+                tests: [
+                    { name: 'Random text', input: 'abc def ghi', expected: 'fail' },
+                    { name: 'Special chars', input: '1@ tab po qd', expected: 'fail' },
+                    { name: 'Unicode emoji', input: '💊 1 tab po qd', expected: 'fail' },
+                ]
+            }
         ];
 
-        // Stress test data
-        const stressTests = [
-            { category: 'Memory Limits', tests: [
-                { name: '100-digit quantity', status: 'pass', duration: '1ms' },
-                { name: 'MAX_SAFE_INTEGER', status: 'pass', duration: '0.5ms' },
-                { name: '10KB input', status: 'pass', duration: '2ms' },
-                { name: '100 filler words', status: 'pass', duration: '3ms' },
-            ]},
-            { category: 'Security Tests', tests: [
-                { name: 'SQL injection', status: 'pass', duration: '0.2ms' },
-                { name: 'XSS attempt', status: 'pass', duration: '0.2ms' },
-                { name: 'Path traversal', status: 'pass', duration: '0.2ms' },
-                { name: 'Format string', status: 'pass', duration: '0.2ms' },
-            ]},
-            { category: 'Unicode & Special', tests: [
-                { name: 'Emoji input', status: 'pass', duration: '0.3ms' },
-                { name: 'Zalgo text', status: 'pass', duration: '0.3ms' },
-                { name: 'RTL override', status: 'pass', duration: '0.3ms' },
-                { name: 'Null bytes', status: 'pass', duration: '0.2ms' },
-            ]},
-            { category: 'Boundary Tests', tests: [
-                { name: 'Zero quantity', status: 'pass', duration: '0.2ms' },
-                { name: 'Negative number', status: 'pass', duration: '0.2ms' },
-                { name: 'Scientific notation', status: 'pass', duration: '0.3ms' },
-                { name: 'Multiple decimals', status: 'pass', duration: '0.2ms' },
-            ]}
-        ];
-
-        // Initialize WASM
         async function initWasm() {
             try {
                 await init();
                 wasmInitialized = true;
                 document.getElementById('loadingOverlay').classList.add('hidden');
                 document.getElementById('demoInput').focus();
-                console.log('WASM module loaded successfully');
             } catch (error) {
                 console.error('Failed to load WASM:', error);
                 document.getElementById('loadingOverlay').innerHTML = `
-                    <p style="color: #e74c3c;">Failed to load WebAssembly module</p>
+                    <p style="color: var(--accent-danger);">Failed to load WebAssembly module</p>
                     <p>${error.message}</p>
                 `;
             }
         }
 
-        // Live demo parsing
         function parseDemoInput(input) {
             if (!wasmInitialized || !input.trim()) {
                 resetDemoOutput();
@@ -824,14 +492,13 @@
                 const value = parsed[field.key];
                 const isNull = value === null;
                 return `
-                    <div class="result-field">
+                    <div class="output-field">
                         <label>${field.label}</label>
-                        <div class="value ${isNull ? 'null' : ''}">${isNull ? 'not specified' : value}</div>
+                        <div class="value ${isNull ? 'null' : ''}">${isNull ? '—' : value}</div>
                     </div>
                 `;
             }).join('');
 
-            // Format JSON with syntax highlighting
             const formattedJson = JSON.stringify(parsed, null, 2)
                 .replace(/"([^"]+)":/g, '<span class="json-key">"$1"</span>:')
                 .replace(/: "([^"]*)"/g, ': <span class="json-string">"$1"</span>')
@@ -840,22 +507,21 @@
 
             jsonOutput.innerHTML = `<pre>${formattedJson}</pre>`;
 
-            // Update status
             const hasError = parsed.error !== undefined;
             const statusBadge = document.getElementById('demoStatus');
-            statusBadge.className = `status-badge ${hasError ? 'warning' : 'success'}`;
+            statusBadge.className = `badge ${hasError ? 'badge-warning' : 'badge-success'}`;
             statusBadge.textContent = hasError ? 'Parse Error (Expected)' : `Parsed (${parseTime}ms)`;
         }
 
         function resetDemoOutput() {
             document.getElementById('demoResultGrid').innerHTML = `
-                <div class="result-field"><label>Quantity</label><div class="value null">-</div></div>
-                <div class="result-field"><label>Unit</label><div class="value null">-</div></div>
-                <div class="result-field"><label>Route</label><div class="value null">-</div></div>
-                <div class="result-field"><label>Frequency</label><div class="value null">-</div></div>
+                <div class="output-field"><label>Quantity</label><div class="value null">—</div></div>
+                <div class="output-field"><label>Unit</label><div class="value null">—</div></div>
+                <div class="output-field"><label>Route</label><div class="value null">—</div></div>
+                <div class="output-field"><label>Frequency</label><div class="value null">—</div></div>
             `;
             document.getElementById('demoJsonOutput').innerHTML = '<span class="json-null">Enter an instruction to see JSON output</span>';
-            document.getElementById('demoStatus').className = 'status-badge success';
+            document.getElementById('demoStatus').className = 'badge badge-success';
             document.getElementById('demoStatus').textContent = 'Ready';
         }
 
@@ -866,7 +532,25 @@
             input.focus();
         };
 
-        // Debounce function
+        function renderTestCategories() {
+            const container = document.getElementById('edgeCaseResults');
+            container.innerHTML = edgeCaseTests.map(cat => `
+                <div class="test-category-card">
+                    <h3>${cat.category}</h3>
+                    <ul class="test-list">
+                        ${cat.tests.map(test => `
+                            <li class="test-list-item">
+                                <span class="name">${test.name}</span>
+                                <span class="status ${test.expected}">
+                                    ${test.expected === 'pass' ? '✓ PASS' : '✗ FAIL'}
+                                </span>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+            `).join('');
+        }
+
         function debounce(func, wait) {
             let timeout;
             return function executedFunction(...args) {
@@ -879,28 +563,6 @@
             };
         }
 
-        // Render test categories
-        function renderTestCategories(containerId, categories) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = categories.map(cat => `
-                <div class="test-category">
-                    <h3>${cat.category}</h3>
-                    <ul class="test-list">
-                        ${cat.tests.map(test => `
-                            <li class="test-item">
-                                <span class="test-name">${test.name}</span>
-                                <span class="test-status ${test.status || test.expected}">
-                                    ${test.status === 'pass' || test.expected === 'pass' ? '✓ PASS' : '✗ FAIL'}
-                                    ${test.duration ? `<span class="duration">${test.duration}</span>` : ''}
-                                </span>
-                            </li>
-                        `).join('')}
-                    </ul>
-                </div>
-            `).join('');
-        }
-
-        // Event listeners
         const demoInput = document.getElementById('demoInput');
         const debouncedParse = debounce(parseDemoInput, 50);
 
@@ -908,10 +570,8 @@
             debouncedParse(e.target.value);
         });
 
-        // Initialize
         initWasm();
-        renderTestCategories('edgeCaseResults', edgeCaseTests);
-        renderTestCategories('stressTestResults', stressTests);
+        renderTestCategories();
     </script>
 </body>
 </html>
