@@ -1,0 +1,868 @@
+{
+  "timestamp": "2026-03-28T19:57:39.495Z",
+  "results": {
+    "realistic": {
+      "results": [
+        {
+          "payload": "Take 1 tablet by mouth daily",
+          "status": "SUCCESS",
+          "parsed": {
+            "confidence": 100,
+            "confidence_level": "high",
+            "drug_name": null,
+            "duration": null,
+            "frequency": "once_daily",
+            "indication": null,
+            "quantity": "1",
+            "requires_review": false,
+            "route": "oral",
+            "success": true,
+            "unit": "tab",
+            "validation": {
+              "errors": [],
+              "is_valid": true,
+              "suggestions": [],
+              "warnings": []
+            }
+          },
+          "duration": 9.0496
+        },
+        {
+          "payload": "Take 2 capsules PO BID",
+          "status": "SUCCESS",
+          "parsed": {
+            "confidence": 100,
+            "confidence_level": "high",
+            "drug_name": null,
+            "duration": null,
+            "frequency": "twice_daily",
+            "indication": null,
+            "quantity": "2",
+            "requires_review": false,
+            "route": "oral",
+            "success": true,
+            "unit": "cap",
+            "validation": {
+              "errors": [],
+              "is_valid": true,
+              "suggestions": [],
+              "warnings": []
+            }
+          },
+          "duration": 0.1216
+        },
+        {
+          "payload": "Administer 500 mg IV q8h",
+          "status": "SUCCESS",
+          "parsed": {
+            "confidence": 100,
+            "confidence_level": "high",
+            "drug_name": null,
+            "duration": null,
+            "frequency": "every_8_hours",
+            "indication": null,
+            "quantity": "500",
+            "requires_review": false,
+            "route": "intravenous",
+            "success": true,
+            "unit": "mg",
+            "validation": {
+              "errors": [],
+              "is_valid": true,
+              "suggestions": [],
+              "warnings": []
+            }
+          },
+          "duration": 0.0399
+        },
+        {
+          "payload": "Apply 1 patch topically q72h",
+          "status": "ERROR",
+          "error": "Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: 'y 1 patch topically q72h')",
+          "duration": 0.392
+        },
+        {
+          "payload": "Inhale 2 puffs inhaled q4h PRN",
+          "status": "ERROR",
+          "error": "Invalid start of instruction. Try starting with a number or action word like 'Take' or 'Give'. (near: 'Inhale 2 puffs inhal')\nSuggestions:\n  - Try: 'Take 1...'\n  - Try: 'Give 2...'\n  - Try: '1 tab...'",
+          "duration": 0.116
+        },
+        {
+          "payload": "Inject 10 units subcutaneously daily",
+          "status": "ERROR",
+          "error": "Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '0 units subcutaneously daily')",
+          "duration": 0.0333
+        },
+        {
+          "payload": "Place 1 tablet sublingually PRN",
+          "status": "ERROR",
+          "error": "Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: ' 1 tablet sublingually PRN')\nSuggestions:\n  - Did you mean 'tablet' instead of 'tabl'?",
+          "duration": 0.0561
+        },
+        {
+          "payload": "Instill 2 drops in each eye TID",
+          "status": "ERROR",
+          "error": "Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: 'Instill 2 drops in each eye TID')",
+          "duration": 0.033
+        },
+        {
+          "payload": "Insert 1 suppository rectally BID",
+          "status": "SUCCESS",
+          "parsed": {
+            "confidence": 100,
+            "confidence_level": "high",
+            "drug_name": null,
+            "duration": null,
+            "frequency": "twice_daily",
+            "indication": null,
+            "quantity": "1",
+            "requires_review": false,
+            "route": "rectal",
+            "success": true,
+            "unit": "supp",
+            "validation": {
+              "errors": [],
+              "is_valid": true,
+              "suggestions": [],
+              "warnings": []
+            }
+          },
+          "duration": 0.1155
+        },
+        {
+          "payload": "Give 5 ml orally QID",
+          "status": "ERROR",
+          "error": "Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: 'Give 5 ml orally QID')",
+          "duration": 0.0408
+        },
+        {
+          "payload": "Take 1 tablet PO in the morning and 2 tablets PO at bedtime",
+          "status": "ERROR",
+          "error": "Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: 'Take 1 tablet PO in the morning and 2')\nSuggestions:\n  - Did you mean 'by mouth' instead of 'po'?\n  - Did you mean 'tablet' instead of 'tabl'?",
+          "duration": 0.0557
+        },
+        {
+          "payload": "Give 500 mg IV over 30 minutes q8h for 7 days",
+          "status": "ERROR",
+          "error": "Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: 'Give 500 mg IV over 30 minutes q8h ')",
+          "duration": 0.0248
+        },
+        {
+          "payload": "Apply thin layer topically to affected area BID",
+          "status": "ERROR",
+          "error": "Missing quantity. Please include a number (e.g., 'Take 1 tablet...'). (near: 'Apply thin layer topically')\nSuggestions:\n  - Did you mean: 'Take 1 tab...'?\n  - Did you mean: 'Give 2 capsules...'?",
+          "duration": 0.0172
+        },
+        {
+          "payload": "Take 2 capsules by mouth with food three times daily",
+          "status": "ERROR",
+          "error": "Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '2 capsules by mouth with food three time')\nSuggestions:\n  - Did you mean 'by mouth' instead of 'by mout'?\n  - Did you mean 'capsule' instead of 'capsul'?",
+          "duration": 0.0234
+        },
+        {
+          "payload": "Administer 10 ml via nebulizer every 4 hours as needed",
+          "status": "ERROR",
+          "error": "Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: 'Administer 10 ml via nebulizer every ')",
+          "duration": 0.0259
+        },
+        {
+          "payload": "Inject 20 units subcut 30 minutes before meals",
+          "status": "ERROR",
+          "error": "Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: 'ect 20 units subcut 30 minutes before me')",
+          "duration": 0.0279
+        },
+        {
+          "payload": "Take 1 tab PO QAM and 1 tab PO QHS",
+          "status": "ERROR",
+          "error": "Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: 'Take 1 tab PO QAM and 1 tab PO QHS')\nSuggestions:\n  - Did you mean 'by mouth' instead of 'po'?",
+          "duration": 0.0222
+        },
+        {
+          "payload": "Instill 1 drop OD TID and 1 drop OS BID",
+          "status": "ERROR",
+          "error": "Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: 'still 1 drop OD TID and 1 drop OS BID')",
+          "duration": 0.0202
+        },
+        {
+          "payload": "Give 5 mg per kg PO q6h",
+          "status": "ERROR",
+          "error": "Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: 'Give 5 mg per kg PO q6h')\nSuggestions:\n  - Did you mean 'by mouth' instead of 'po'?",
+          "duration": 0.0228
+        },
+        {
+          "payload": "Administer 0.1 ml per kg IV q8h",
+          "status": "ERROR",
+          "error": "Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: 'Administer 0.1 ml per kg IV q8h')",
+          "duration": 0.0217
+        },
+        {
+          "payload": "Apply 1 inch of ointment topically TID",
+          "status": "ERROR",
+          "error": "Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: 'Apply 1 inch of ointment top')",
+          "duration": 0.0278
+        },
+        {
+          "payload": "Give 2.5 ml orally every 4 hours as needed",
+          "status": "ERROR",
+          "error": "Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: 'Give 2.5 ml orally every 4 hours')",
+          "duration": 0.0222
+        },
+        {
+          "payload": "Take 0.5 tablet PO daily - may increase to 1 tablet if tolerated",
+          "status": "ERROR",
+          "error": "Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '0.5 tablet PO daily - may increase to 1 ')\nSuggestions:\n  - Did you mean 'by mouth' instead of 'po'?\n  - Did you mean 'tablet' instead of 'tabl'?",
+          "duration": 0.0207
+        },
+        {
+          "payload": "Give 250 mg PO BID - reduce dose if CrCl < 30",
+          "status": "ERROR",
+          "error": "Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: 'Give 250 mg PO BID - reduce dose if CrC')\nSuggestions:\n  - Did you mean 'by mouth' instead of 'po'?",
+          "duration": 0.0176
+        },
+        {
+          "payload": "Apply 0.25 patch transdermally q72h",
+          "status": "ERROR",
+          "error": "Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '25 patch transdermally q72h')",
+          "duration": 0.0213
+        },
+        {
+          "payload": "Infuse 1000 ml IV over 8 hours",
+          "status": "ERROR",
+          "error": "Invalid start of instruction. Try starting with a number or action word like 'Take' or 'Give'. (near: 'Infuse 1000 ml IV ov')\nSuggestions:\n  - Try: 'Take 1...'\n  - Try: 'Give 2...'\n  - Try: '1 tab...'",
+          "duration": 0.0148
+        },
+        {
+          "payload": "Give 1 g IV q6h around the clock",
+          "status": "ERROR",
+          "error": "Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: 'Give 1 g IV q6h around the clock')",
+          "duration": 0.0184
+        },
+        {
+          "payload": "Titrate 0.5-10 mcg per kg per minute IV per protocol",
+          "status": "ERROR",
+          "error": "Invalid start of instruction. Try starting with a number or action word like 'Take' or 'Give'. (near: 'Titrate 0.5-10 mcg p')\nSuggestions:\n  - Try: 'Take 1...'\n  - Try: 'Give 2...'\n  - Try: '1 tab...'",
+          "duration": 0.0151
+        },
+        {
+          "payload": "Bolus 5000 units IV then infuse 1000 units per hour",
+          "status": "ERROR",
+          "error": "Invalid start of instruction. Try starting with a number or action word like 'Take' or 'Give'. (near: 'Bolus 5000 units IV ')\nSuggestions:\n  - Try: 'Take 1...'\n  - Try: 'Give 2...'\n  - Try: '1 tab...'",
+          "duration": 0.0216
+        },
+        {
+          "payload": "Take 150 mg per m2 PO daily on days 1-14 of 21-day cycle",
+          "status": "ERROR",
+          "error": "Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: 'Take 150 mg per m2 PO daily on d')\nSuggestions:\n  - Did you mean 'by mouth' instead of 'po'?",
+          "duration": 0.0318
+        },
+        {
+          "payload": "Administer 75 mg per m2 IV on day 1 q21days",
+          "status": "ERROR",
+          "error": "Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: 'Administer 75 mg per m2 IV on day 1 q')",
+          "duration": 0.0242
+        },
+        {
+          "payload": "Give 2 mg per kg IV q3weeks",
+          "status": "ERROR",
+          "error": "Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: 'Give 2 mg per kg IV q3weeks')",
+          "duration": 0.0207
+        }
+      ],
+      "stats": {
+        "total": 32,
+        "success": 4,
+        "error": 28,
+        "avgDuration": 0.32861875000000007
+      }
+    },
+    "combinatorial": {
+      "totalCombinations": 1000,
+      "successCount": 0,
+      "avgDuration": 0.025525300000000025,
+      "throughput": 39176.81672693363
+    },
+    "batch": [
+      {
+        "batchSize": 10,
+        "individualDuration": 0.2555,
+        "batchDuration": 1.1816,
+        "speedup": 0.21623222748815166
+      },
+      {
+        "batchSize": 100,
+        "individualDuration": 1.9729,
+        "batchDuration": 0.0816,
+        "speedup": 24.17769607843137
+      },
+      {
+        "batchSize": 500,
+        "individualDuration": 12.292,
+        "batchDuration": 0.1616,
+        "speedup": 76.06435643564356
+      },
+      {
+        "batchSize": 1000,
+        "individualDuration": 12.8632,
+        "batchDuration": 0.3662,
+        "speedup": 35.12616056799563
+      }
+    ],
+    "extreme": [
+      {
+        "name": "Maximum length (50KB random)",
+        "status": "UNEXPECTED_PASS",
+        "duration": 6.1566,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Input too long (max 10,000 characters). Please provide a concise medication instruction.\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Input too long (max 10,000 characters). Please provide a concise medication instruction.\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}",
+        "expected": "error"
+      },
+      {
+        "name": "Repeated pattern (1000x)",
+        "status": "PASS",
+        "duration": 0.2546,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Input too long (max 10,000 characters). Please provide a concise medication instruction.\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Input too long (max 10,000 characters). Please provide a concise medication instruction.\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}"
+      },
+      {
+        "name": "Deep word nesting",
+        "status": "PASS",
+        "duration": 0.073,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: 'take take take take take ')\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: 'take take take take take ')\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}"
+      },
+      {
+        "name": "Extreme quantity (MAX_SAFE_INTEGER)",
+        "status": "PASS",
+        "duration": 1.3973,
+        "result": "{\"confidence\":100.0,\"confidence_level\":\"high\",\"drug_name\":null,\"duration\":null,\"frequency\":\"once_daily\",\"indication\":null,\"quantity\":\"9007199254740991\",\"requires_review\":false,\"route\":\"oral\",\"success\":true,\"unit\":\"tab\",\"validation\":{\"errors\":[],\"is_valid\":true,\"suggestions\":[],\"warnings\":[\"Quantity '9007199254740991' is unusually large. Please verify.\",\"Quantity 9007199254740991 tab is outside typical range (0.5-10 tab)\"]}}"
+      },
+      {
+        "name": "Extreme quantity (negative)",
+        "status": "UNEXPECTED_PASS",
+        "duration": 0.056,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Invalid start of instruction. Try starting with a number or action word like 'Take' or 'Give'. (near: '-9999999999 tab po q')\\nSuggestions:\\n  - Try: 'Take 1...'\\n  - Try: 'Give 2...'\\n  - Try: '1 tab...'\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Invalid start of instruction. Try starting with a number or action word like 'Take' or 'Give'. (near: '-9999999999 tab po q')\\nSuggestions:\\n  - Try: 'Take 1...'\\n  - Try: 'Give 2...'\\n  - Try: '1 tab...'\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}",
+        "expected": "error"
+      },
+      {
+        "name": "High precision decimal (100 places)",
+        "status": "PASS",
+        "duration": 0.0991,
+        "result": "{\"confidence\":100.0,\"confidence_level\":\"high\",\"drug_name\":null,\"duration\":null,\"frequency\":\"once_daily\",\"indication\":null,\"quantity\":\"1.9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999\",\"requires_review\":false,\"route\":\"oral\",\"success\":true,\"unit\":\"tab\",\"validation\":{\"errors\":[],\"is_valid\":true,\"suggestions\":[],\"warnings\":[]}}"
+      },
+      {
+        "name": "Many units (100)",
+        "status": "PASS",
+        "duration": 0.0644,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab tab tab tab tab tab ')\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab tab tab tab tab tab ')\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}"
+      },
+      {
+        "name": "Many routes (100)",
+        "status": "PASS",
+        "duration": 0.0451,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab po po po po po po po po')\\nSuggestions:\\n  - Did you mean 'by mouth' instead of 'po'?\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab po po po po po po po po')\\nSuggestions:\\n  - Did you mean 'by mouth' instead of 'po'?\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}"
+      },
+      {
+        "name": "Many frequencies (100)",
+        "status": "PASS",
+        "duration": 0.198,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab po qd qd qd qd qd qd qd qd')\\nSuggestions:\\n  - Did you mean 'by mouth' instead of 'po'?\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab po qd qd qd qd qd qd qd qd')\\nSuggestions:\\n  - Did you mean 'by mouth' instead of 'po'?\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}"
+      },
+      {
+        "name": "Unicode: All emoji",
+        "status": "UNEXPECTED_PASS",
+        "duration": 0.173,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Invalid start of instruction. Try starting with a number or action word like 'Take' or 'Give'. (near: '💊💉🩺🏥 1 t')\\nSuggestions:\\n  - Try: 'Take 1...'\\n  - Try: 'Give 2...'\\n  - Try: '1 tab...'\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Invalid start of instruction. Try starting with a number or action word like 'Take' or 'Give'. (near: '💊💉🩺🏥 1 t')\\nSuggestions:\\n  - Try: 'Take 1...'\\n  - Try: 'Give 2...'\\n  - Try: '1 tab...'\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}",
+        "expected": "error"
+      },
+      {
+        "name": "Unicode: Right-to-left override",
+        "status": "UNEXPECTED_PASS",
+        "duration": 0.0671,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab‮ po qd‬')\\nSuggestions:\\n  - Did you mean 'by mouth' instead of 'po'?\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab‮ po qd‬')\\nSuggestions:\\n  - Did you mean 'by mouth' instead of 'po'?\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}",
+        "expected": "error"
+      },
+      {
+        "name": "Unicode: Zero-width characters",
+        "status": "PASS",
+        "duration": 0.0773,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1​ tab‌ po‍ qd')\\nSuggestions:\\n  - Did you mean 'by mouth' instead of 'po'?\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1​ tab‌ po‍ qd')\\nSuggestions:\\n  - Did you mean 'by mouth' instead of 'po'?\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}"
+      },
+      {
+        "name": "Unicode: Combining characters",
+        "status": "UNEXPECTED_PASS",
+        "duration": 0.0571,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1̷̛̛̣̟͎̺̗̠̬')\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1̷̛̛̣̟͎̺̗̠̬')\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}",
+        "expected": "error"
+      },
+      {
+        "name": "Control: Null bytes",
+        "status": "UNEXPECTED_PASS",
+        "duration": 0.0279,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Input contains invalid control characters. Please use only printable characters.\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Input contains invalid control characters. Please use only printable characters.\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}",
+        "expected": "error"
+      },
+      {
+        "name": "Control: All ASCII control",
+        "status": "UNEXPECTED_PASS",
+        "duration": 0.076,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Input contains invalid control characters. Please use only printable characters.\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Input contains invalid control characters. Please use only printable characters.\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}",
+        "expected": "error"
+      },
+      {
+        "name": "Pathological: A*10000",
+        "status": "UNEXPECTED_PASS",
+        "duration": 1.81,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Missing quantity. Please include a number (e.g., 'Take 1 tablet...'). (near: 'AAAAAAAAAAAAAAAAAAAA')\\nSuggestions:\\n  - Did you mean: 'Take 1 tab...'?\\n  - Did you mean: 'Give 2 capsules...'?\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Missing quantity. Please include a number (e.g., 'Take 1 tablet...'). (near: 'AAAAAAAAAAAAAAAAAAAA')\\nSuggestions:\\n  - Did you mean: 'Take 1 tab...'?\\n  - Did you mean: 'Give 2 capsules...'?\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}",
+        "expected": "error"
+      },
+      {
+        "name": "Pathological: Alternating",
+        "status": "UNEXPECTED_PASS",
+        "duration": 0.8881,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Input too long (max 10,000 characters). Please provide a concise medication instruction.\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Input too long (max 10,000 characters). Please provide a concise medication instruction.\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}",
+        "expected": "error"
+      },
+      {
+        "name": "Pathological: Palindrome",
+        "status": "UNEXPECTED_PASS",
+        "duration": 0.5937,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1tabqdbat11tabqdbat11tabqd')\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1tabqdbat11tabqdbat11tabqd')\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}",
+        "expected": "error"
+      }
+    ],
+    "security": [
+      {
+        "name": "SQL Injection 1",
+        "status": "UNEXPECTED_PASS",
+        "duration": 0.0768,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab'; DROP TABLE meds; ')\\nSuggestions:\\n  - Did you mean 'tablet' instead of 'tabl'?\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab'; DROP TABLE meds; ')\\nSuggestions:\\n  - Did you mean 'tablet' instead of 'tabl'?\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}",
+        "expected": "error"
+      },
+      {
+        "name": "SQL Injection 2",
+        "status": "UNEXPECTED_PASS",
+        "duration": 0.0297,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab'; DELETE FROM presc')\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab'; DELETE FROM presc')\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}",
+        "expected": "error"
+      },
+      {
+        "name": "SQL Injection 3",
+        "status": "UNEXPECTED_PASS",
+        "duration": 0.0575,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab\\\" OR \\\"1\\\"=\\\"1 po qd')\\nSuggestions:\\n  - Did you mean 'by mouth' instead of 'po'?\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab\\\" OR \\\"1\\\"=\\\"1 po qd')\\nSuggestions:\\n  - Did you mean 'by mouth' instead of 'po'?\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}",
+        "expected": "error"
+      },
+      {
+        "name": "SQL Injection 4",
+        "status": "UNEXPECTED_PASS",
+        "duration": 0.0266,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab UNION SELECT * FROM ')\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab UNION SELECT * FROM ')\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}",
+        "expected": "error"
+      },
+      {
+        "name": "SQL Injection 5",
+        "status": "UNEXPECTED_PASS",
+        "duration": 0.0255,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab; EXEC xp_cmdshell(\\\"')\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab; EXEC xp_cmdshell(\\\"')\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}",
+        "expected": "error"
+      },
+      {
+        "name": "XSS Attempt 1",
+        "status": "UNEXPECTED_PASS",
+        "duration": 0.0424,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab <script>alert(\\\"xss\\\")')\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab <script>alert(\\\"xss\\\")')\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}",
+        "expected": "error"
+      },
+      {
+        "name": "XSS Attempt 2",
+        "status": "UNEXPECTED_PASS",
+        "duration": 0.023,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab <img src=x onerror=a')\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab <img src=x onerror=a')\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}",
+        "expected": "error"
+      },
+      {
+        "name": "XSS Attempt 3",
+        "status": "UNEXPECTED_PASS",
+        "duration": 0.0232,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab javascript:alert(\\\"xs')\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab javascript:alert(\\\"xs')\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}",
+        "expected": "error"
+      },
+      {
+        "name": "XSS Attempt 4",
+        "status": "UNEXPECTED_PASS",
+        "duration": 0.0223,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab <iframe src=\\\"evil.co')\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab <iframe src=\\\"evil.co')\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}",
+        "expected": "error"
+      },
+      {
+        "name": "XSS Attempt 5",
+        "status": "UNEXPECTED_PASS",
+        "duration": 0.0217,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab <body onload=alert(\\\"')\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab <body onload=alert(\\\"')\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}",
+        "expected": "error"
+      },
+      {
+        "name": "Command Injection 1",
+        "status": "UNEXPECTED_PASS",
+        "duration": 0.0733,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab `rm -rf /` po qd')\\nSuggestions:\\n  - Did you mean 'by mouth' instead of 'po'?\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab `rm -rf /` po qd')\\nSuggestions:\\n  - Did you mean 'by mouth' instead of 'po'?\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}",
+        "expected": "error"
+      },
+      {
+        "name": "Command Injection 2",
+        "status": "UNEXPECTED_PASS",
+        "duration": 0.0379,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab $(cat /etc/passwd) p')\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab $(cat /etc/passwd) p')\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}",
+        "expected": "error"
+      },
+      {
+        "name": "Command Injection 3",
+        "status": "UNEXPECTED_PASS",
+        "duration": 0.028,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab && whoami po qd')\\nSuggestions:\\n  - Did you mean 'by mouth' instead of 'po'?\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab && whoami po qd')\\nSuggestions:\\n  - Did you mean 'by mouth' instead of 'po'?\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}",
+        "expected": "error"
+      },
+      {
+        "name": "Command Injection 4",
+        "status": "UNEXPECTED_PASS",
+        "duration": 0.0249,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab || nc -e /bin/sh att')\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab || nc -e /bin/sh att')\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}",
+        "expected": "error"
+      },
+      {
+        "name": "Path Traversal 1",
+        "status": "UNEXPECTED_PASS",
+        "duration": 0.0487,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab ../../../etc/passwd ')\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab ../../../etc/passwd ')\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}",
+        "expected": "error"
+      },
+      {
+        "name": "Path Traversal 2",
+        "status": "UNEXPECTED_PASS",
+        "duration": 0.0265,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab ..\\\\..\\\\..\\\\windows\\\\sys')\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab ..\\\\..\\\\..\\\\windows\\\\sys')\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}",
+        "expected": "error"
+      },
+      {
+        "name": "Path Traversal 3",
+        "status": "UNEXPECTED_PASS",
+        "duration": 0.022,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab /etc/passwd po qd')\\nSuggestions:\\n  - Did you mean 'by mouth' instead of 'po'?\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab /etc/passwd po qd')\\nSuggestions:\\n  - Did you mean 'by mouth' instead of 'po'?\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}",
+        "expected": "error"
+      },
+      {
+        "name": "Path Traversal 4",
+        "status": "UNEXPECTED_PASS",
+        "duration": 0.021,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab file:///etc/passwd p')\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab file:///etc/passwd p')\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}",
+        "expected": "error"
+      },
+      {
+        "name": "Format String 1",
+        "status": "UNEXPECTED_PASS",
+        "duration": 0.0507,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab %s%s%s%s po qd')\\nSuggestions:\\n  - Did you mean 'by mouth' instead of 'po'?\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab %s%s%s%s po qd')\\nSuggestions:\\n  - Did you mean 'by mouth' instead of 'po'?\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}",
+        "expected": "error"
+      },
+      {
+        "name": "Format String 2",
+        "status": "UNEXPECTED_PASS",
+        "duration": 0.0212,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab %x%x%x%x po qd')\\nSuggestions:\\n  - Did you mean 'by mouth' instead of 'po'?\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab %x%x%x%x po qd')\\nSuggestions:\\n  - Did you mean 'by mouth' instead of 'po'?\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}",
+        "expected": "error"
+      },
+      {
+        "name": "Format String 3",
+        "status": "UNEXPECTED_PASS",
+        "duration": 0.0467,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab %n%n%n%n po qd')\\nSuggestions:\\n  - Did you mean 'by mouth' instead of 'po'?\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab %n%n%n%n po qd')\\nSuggestions:\\n  - Did you mean 'by mouth' instead of 'po'?\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}",
+        "expected": "error"
+      },
+      {
+        "name": "Format String 4",
+        "status": "UNEXPECTED_PASS",
+        "duration": 0.0209,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab %p%p%p%p po qd')\\nSuggestions:\\n  - Did you mean 'by mouth' instead of 'po'?\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab %p%p%p%p po qd')\\nSuggestions:\\n  - Did you mean 'by mouth' instead of 'po'?\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}",
+        "expected": "error"
+      },
+      {
+        "name": "Buffer Overflow: Long unit",
+        "status": "UNEXPECTED_PASS",
+        "duration": 0.7092,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Input too long (max 10,000 characters). Please provide a concise medication instruction.\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Input too long (max 10,000 characters). Please provide a concise medication instruction.\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}",
+        "expected": "error"
+      },
+      {
+        "name": "Buffer Overflow: Repeated pattern",
+        "status": "UNEXPECTED_PASS",
+        "duration": 0.7138,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Input too long (max 10,000 characters). Please provide a concise medication instruction.\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Input too long (max 10,000 characters). Please provide a concise medication instruction.\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}",
+        "expected": "error"
+      }
+    ],
+    "benchmarks": [
+      {
+        "level": "light",
+        "iterations": 1000,
+        "duration": 11.8761,
+        "opsPerSec": 84202.72648428357,
+        "payload": "simple"
+      },
+      {
+        "level": "medium",
+        "iterations": 10000,
+        "duration": 97.9502,
+        "opsPerSec": 102092.69608433673,
+        "payload": "simple"
+      },
+      {
+        "level": "heavy",
+        "iterations": 100000,
+        "duration": 867.2106,
+        "opsPerSec": 115312.24364646834,
+        "payload": "simple"
+      },
+      {
+        "level": "extreme",
+        "iterations": 500000,
+        "duration": 5137.2913,
+        "opsPerSec": 97327.55469793975,
+        "payload": "simple"
+      },
+      {
+        "level": "light",
+        "iterations": 1000,
+        "duration": 14.7152,
+        "opsPerSec": 67956.94248124388,
+        "payload": "complex"
+      },
+      {
+        "level": "medium",
+        "iterations": 5000,
+        "duration": 61.221,
+        "opsPerSec": 81671.3219320168,
+        "payload": "complex"
+      },
+      {
+        "level": "heavy",
+        "iterations": 25000,
+        "duration": 313.141,
+        "opsPerSec": 79836.23990470746,
+        "payload": "complex"
+      },
+      {
+        "level": "error",
+        "iterations": 50000,
+        "duration": 436.0868,
+        "opsPerSec": 114656.07305701525,
+        "payload": "error"
+      }
+    ],
+    "memory": [
+      {
+        "test": "sustained",
+        "delta": 300984
+      },
+      {
+        "test": "large_input",
+        "delta": -1551136
+      },
+      {
+        "test": "accumulation",
+        "delta": 20737920
+      }
+    ],
+    "concurrency": [
+      {
+        "pattern": "burst",
+        "count": 100,
+        "duration": 1.6652
+      },
+      {
+        "pattern": "mixed",
+        "count": 1000,
+        "duration": 9.7246
+      }
+    ],
+    "boundary": [
+      {
+        "name": "Zero quantity",
+        "status": "PASS",
+        "duration": 0.0403,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"low\",\"drug_name\":null,\"duration\":null,\"frequency\":\"once_daily\",\"indication\":null,\"quantity\":\"0\",\"requires_review\":true,\"route\":\"oral\",\"success\":false,\"unit\":\"tab\",\"validation\":{\"errors\":[\"Quantity must be greater than zero\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[\"Quantity 0 tab is outside typical range (0.5-10 tab)\"]}}"
+      },
+      {
+        "name": "Zero decimal",
+        "status": "PASS",
+        "duration": 0.0286,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"low\",\"drug_name\":null,\"duration\":null,\"frequency\":\"once_daily\",\"indication\":null,\"quantity\":\"0.0\",\"requires_review\":true,\"route\":\"oral\",\"success\":false,\"unit\":\"tab\",\"validation\":{\"errors\":[\"Quantity must be greater than zero\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[\"Quantity 0 tab is outside typical range (0.5-10 tab)\"]}}"
+      },
+      {
+        "name": "Very small decimal",
+        "status": "PASS",
+        "duration": 0.0276,
+        "result": "{\"confidence\":100.0,\"confidence_level\":\"high\",\"drug_name\":null,\"duration\":null,\"frequency\":\"once_daily\",\"indication\":null,\"quantity\":\"0.0000001\",\"requires_review\":false,\"route\":\"oral\",\"success\":true,\"unit\":\"tab\",\"validation\":{\"errors\":[],\"is_valid\":true,\"suggestions\":[],\"warnings\":[\"Quantity '0.0000001' is extremely small. Please verify this is correct.\",\"Quantity 0.0000001 tab is outside typical range (0.5-10 tab)\"]}}"
+      },
+      {
+        "name": "One (boundary)",
+        "status": "PASS",
+        "duration": 0.024,
+        "result": "{\"confidence\":100.0,\"confidence_level\":\"high\",\"drug_name\":null,\"duration\":null,\"frequency\":\"once_daily\",\"indication\":null,\"quantity\":\"1\",\"requires_review\":false,\"route\":\"oral\",\"success\":true,\"unit\":\"tab\",\"validation\":{\"errors\":[],\"is_valid\":true,\"suggestions\":[],\"warnings\":[]}}"
+      },
+      {
+        "name": "One decimal",
+        "status": "PASS",
+        "duration": 0.0236,
+        "result": "{\"confidence\":100.0,\"confidence_level\":\"high\",\"drug_name\":null,\"duration\":null,\"frequency\":\"once_daily\",\"indication\":null,\"quantity\":\"1.0\",\"requires_review\":false,\"route\":\"oral\",\"success\":true,\"unit\":\"tab\",\"validation\":{\"errors\":[],\"is_valid\":true,\"suggestions\":[],\"warnings\":[]}}"
+      },
+      {
+        "name": "Large quantity",
+        "status": "PASS",
+        "duration": 0.0256,
+        "result": "{\"confidence\":100.0,\"confidence_level\":\"high\",\"drug_name\":null,\"duration\":null,\"frequency\":\"once_daily\",\"indication\":null,\"quantity\":\"999\",\"requires_review\":false,\"route\":\"oral\",\"success\":true,\"unit\":\"tab\",\"validation\":{\"errors\":[],\"is_valid\":true,\"suggestions\":[],\"warnings\":[\"Quantity 999 tab is outside typical range (0.5-10 tab)\"]}}"
+      },
+      {
+        "name": "Very large quantity",
+        "status": "PASS",
+        "duration": 0.0251,
+        "result": "{\"confidence\":100.0,\"confidence_level\":\"high\",\"drug_name\":null,\"duration\":null,\"frequency\":\"once_daily\",\"indication\":null,\"quantity\":\"9999\",\"requires_review\":false,\"route\":\"oral\",\"success\":true,\"unit\":\"tab\",\"validation\":{\"errors\":[],\"is_valid\":true,\"suggestions\":[],\"warnings\":[\"Quantity 9999 tab is outside typical range (0.5-10 tab)\"]}}"
+      },
+      {
+        "name": "Extreme quantity",
+        "status": "PASS",
+        "duration": 0.0241,
+        "result": "{\"confidence\":100.0,\"confidence_level\":\"high\",\"drug_name\":null,\"duration\":null,\"frequency\":\"once_daily\",\"indication\":null,\"quantity\":\"99999\",\"requires_review\":false,\"route\":\"oral\",\"success\":true,\"unit\":\"tab\",\"validation\":{\"errors\":[],\"is_valid\":true,\"suggestions\":[],\"warnings\":[\"Quantity 99999 tab is outside typical range (0.5-10 tab)\"]}}"
+      },
+      {
+        "name": "Half (common fraction)",
+        "status": "PASS",
+        "duration": 0.0237,
+        "result": "{\"confidence\":100.0,\"confidence_level\":\"high\",\"drug_name\":null,\"duration\":null,\"frequency\":\"once_daily\",\"indication\":null,\"quantity\":\"0.5\",\"requires_review\":false,\"route\":\"oral\",\"success\":true,\"unit\":\"tab\",\"validation\":{\"errors\":[],\"is_valid\":true,\"suggestions\":[],\"warnings\":[]}}"
+      },
+      {
+        "name": "Quarter (common fraction)",
+        "status": "PASS",
+        "duration": 0.0243,
+        "result": "{\"confidence\":100.0,\"confidence_level\":\"high\",\"drug_name\":null,\"duration\":null,\"frequency\":\"once_daily\",\"indication\":null,\"quantity\":\"0.25\",\"requires_review\":false,\"route\":\"oral\",\"success\":true,\"unit\":\"tab\",\"validation\":{\"errors\":[],\"is_valid\":true,\"suggestions\":[],\"warnings\":[\"Quantity 0.25 tab is outside typical range (0.5-10 tab)\"]}}"
+      },
+      {
+        "name": "One and half",
+        "status": "PASS",
+        "duration": 0.0236,
+        "result": "{\"confidence\":100.0,\"confidence_level\":\"high\",\"drug_name\":null,\"duration\":null,\"frequency\":\"once_daily\",\"indication\":null,\"quantity\":\"1.5\",\"requires_review\":false,\"route\":\"oral\",\"success\":true,\"unit\":\"tab\",\"validation\":{\"errors\":[],\"is_valid\":true,\"suggestions\":[],\"warnings\":[]}}"
+      },
+      {
+        "name": "Two and half",
+        "status": "PASS",
+        "duration": 0.0217,
+        "result": "{\"confidence\":100.0,\"confidence_level\":\"high\",\"drug_name\":null,\"duration\":null,\"frequency\":\"once_daily\",\"indication\":null,\"quantity\":\"2.5\",\"requires_review\":false,\"route\":\"oral\",\"success\":true,\"unit\":\"tab\",\"validation\":{\"errors\":[],\"is_valid\":true,\"suggestions\":[],\"warnings\":[]}}"
+      },
+      {
+        "name": "Empty string",
+        "status": "UNEXPECTED_PASS",
+        "duration": 0.0244,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Empty input. Please provide a medication instruction like 'Take 1 tablet by mouth daily'.\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Empty input. Please provide a medication instruction like 'Take 1 tablet by mouth daily'.\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}",
+        "expected": "error"
+      },
+      {
+        "name": "1 character",
+        "status": "PASS",
+        "duration": 0.0204,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Missing quantity. Please include a number (e.g., 'Take 1 tablet...'). (near: 'x')\\nSuggestions:\\n  - Did you mean: 'Take 1 tab...'?\\n  - Did you mean: 'Give 2 capsules...'?\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Missing quantity. Please include a number (e.g., 'Take 1 tablet...'). (near: 'x')\\nSuggestions:\\n  - Did you mean: 'Take 1 tab...'?\\n  - Did you mean: 'Give 2 capsules...'?\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}"
+      },
+      {
+        "name": "10 characters",
+        "status": "PASS",
+        "duration": 0.0203,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Missing quantity. Please include a number (e.g., 'Take 1 tablet...'). (near: 'xxxxxxxxxx')\\nSuggestions:\\n  - Did you mean: 'Take 1 tab...'?\\n  - Did you mean: 'Give 2 capsules...'?\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Missing quantity. Please include a number (e.g., 'Take 1 tablet...'). (near: 'xxxxxxxxxx')\\nSuggestions:\\n  - Did you mean: 'Take 1 tab...'?\\n  - Did you mean: 'Give 2 capsules...'?\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}"
+      },
+      {
+        "name": "100 characters",
+        "status": "PASS",
+        "duration": 0.0264,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab po xxxxxxxxxxxxxxxxxxxx')\\nSuggestions:\\n  - Did you mean 'by mouth' instead of 'po'?\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab po xxxxxxxxxxxxxxxxxxxx')\\nSuggestions:\\n  - Did you mean 'by mouth' instead of 'po'?\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}"
+      },
+      {
+        "name": "1000 characters",
+        "status": "PASS",
+        "duration": 0.033,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab po xxxxxxxxxxxxxxxxxxxx')\\nSuggestions:\\n  - Did you mean 'by mouth' instead of 'po'?\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab po xxxxxxxxxxxxxxxxxxxx')\\nSuggestions:\\n  - Did you mean 'by mouth' instead of 'po'?\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}"
+      },
+      {
+        "name": "10000 characters",
+        "status": "PASS",
+        "duration": 0.1038,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab po xxxxxxxxxxxxxxxxxxxx')\\nSuggestions:\\n  - Did you mean 'by mouth' instead of 'po'?\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Unable to parse instruction. Expected format: '<action> <quantity> <unit> <route> <frequency>' (near: '1 tab po xxxxxxxxxxxxxxxxxxxx')\\nSuggestions:\\n  - Did you mean 'by mouth' instead of 'po'?\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}"
+      },
+      {
+        "name": "Quantity only",
+        "status": "PASS",
+        "duration": 0.0404,
+        "result": "{\"confidence\":45.0,\"confidence_level\":\"low\",\"drug_name\":null,\"duration\":null,\"frequency\":null,\"indication\":null,\"quantity\":\"1\",\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[],\"is_valid\":true,\"suggestions\":[],\"warnings\":[]}}"
+      },
+      {
+        "name": "Unit only",
+        "status": "PASS",
+        "duration": 0.0285,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Missing quantity. Please include a number (e.g., 'Take 1 tablet...'). (near: 'tab')\\nSuggestions:\\n  - Did you mean: 'Take 1 tab...'?\\n  - Did you mean: 'Give 2 capsules...'?\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Missing quantity. Please include a number (e.g., 'Take 1 tablet...'). (near: 'tab')\\nSuggestions:\\n  - Did you mean: 'Take 1 tab...'?\\n  - Did you mean: 'Give 2 capsules...'?\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}"
+      },
+      {
+        "name": "Route only",
+        "status": "PASS",
+        "duration": 0.0173,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Missing quantity. Please include a number (e.g., 'Take 1 tablet...'). (near: 'po')\\nSuggestions:\\n  - Did you mean: 'Take 1 tab...'?\\n  - Did you mean: 'Give 2 capsules...'?\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Missing quantity. Please include a number (e.g., 'Take 1 tablet...'). (near: 'po')\\nSuggestions:\\n  - Did you mean: 'Take 1 tab...'?\\n  - Did you mean: 'Give 2 capsules...'?\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}"
+      },
+      {
+        "name": "Frequency only",
+        "status": "PASS",
+        "duration": 0.0157,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Missing quantity. Please include a number (e.g., 'Take 1 tablet...'). (near: 'qd')\\nSuggestions:\\n  - Did you mean: 'Take 1 tab...'?\\n  - Did you mean: 'Give 2 capsules...'?\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Missing quantity. Please include a number (e.g., 'Take 1 tablet...'). (near: 'qd')\\nSuggestions:\\n  - Did you mean: 'Take 1 tab...'?\\n  - Did you mean: 'Give 2 capsules...'?\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}"
+      },
+      {
+        "name": "Quantity + Unit",
+        "status": "PASS",
+        "duration": 0.0257,
+        "result": "{\"confidence\":80.0,\"confidence_level\":\"high\",\"drug_name\":null,\"duration\":null,\"frequency\":null,\"indication\":null,\"quantity\":\"1\",\"requires_review\":false,\"route\":null,\"success\":true,\"unit\":\"tab\",\"validation\":{\"errors\":[],\"is_valid\":true,\"suggestions\":[],\"warnings\":[]}}"
+      },
+      {
+        "name": "Route + Frequency",
+        "status": "PASS",
+        "duration": 0.0176,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Missing quantity. Please include a number (e.g., 'Take 1 tablet...'). (near: 'po qd')\\nSuggestions:\\n  - Did you mean: 'Take 1 tab...'?\\n  - Did you mean: 'Give 2 capsules...'?\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Missing quantity. Please include a number (e.g., 'Take 1 tablet...'). (near: 'po qd')\\nSuggestions:\\n  - Did you mean: 'Take 1 tab...'?\\n  - Did you mean: 'Give 2 capsules...'?\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}"
+      },
+      {
+        "name": "Quantity + Route",
+        "status": "PASS",
+        "duration": 0.0247,
+        "result": "{\"confidence\":75.0,\"confidence_level\":\"medium\",\"drug_name\":null,\"duration\":null,\"frequency\":null,\"indication\":null,\"quantity\":\"1\",\"requires_review\":true,\"route\":\"oral\",\"success\":false,\"unit\":null,\"validation\":{\"errors\":[],\"is_valid\":true,\"suggestions\":[],\"warnings\":[]}}"
+      },
+      {
+        "name": "Unit + Frequency",
+        "status": "PASS",
+        "duration": 0.0171,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Missing quantity. Please include a number (e.g., 'Take 1 tablet...'). (near: 'tab qd')\\nSuggestions:\\n  - Did you mean: 'Take 1 tab...'?\\n  - Did you mean: 'Give 2 capsules...'?\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Missing quantity. Please include a number (e.g., 'Take 1 tablet...'). (near: 'tab qd')\\nSuggestions:\\n  - Did you mean: 'Take 1 tab...'?\\n  - Did you mean: 'Give 2 capsules...'?\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}"
+      },
+      {
+        "name": "No frequency",
+        "status": "PASS",
+        "duration": 0.0245,
+        "result": "{\"confidence\":90.0,\"confidence_level\":\"high\",\"drug_name\":null,\"duration\":null,\"frequency\":null,\"indication\":null,\"quantity\":\"1\",\"requires_review\":false,\"route\":\"oral\",\"success\":true,\"unit\":\"tab\",\"validation\":{\"errors\":[],\"is_valid\":true,\"suggestions\":[],\"warnings\":[]}}"
+      },
+      {
+        "name": "No route",
+        "status": "PASS",
+        "duration": 0.0237,
+        "result": "{\"confidence\":90.0,\"confidence_level\":\"high\",\"drug_name\":null,\"duration\":null,\"frequency\":\"once_daily\",\"indication\":null,\"quantity\":\"1\",\"requires_review\":false,\"route\":null,\"success\":true,\"unit\":\"tab\",\"validation\":{\"errors\":[],\"is_valid\":true,\"suggestions\":[],\"warnings\":[]}}"
+      },
+      {
+        "name": "No unit",
+        "status": "PASS",
+        "duration": 0.0211,
+        "result": "{\"confidence\":85.0,\"confidence_level\":\"high\",\"drug_name\":null,\"duration\":null,\"frequency\":\"once_daily\",\"indication\":null,\"quantity\":\"1\",\"requires_review\":false,\"route\":\"oral\",\"success\":true,\"unit\":null,\"validation\":{\"errors\":[],\"is_valid\":true,\"suggestions\":[],\"warnings\":[]}}"
+      },
+      {
+        "name": "No quantity",
+        "status": "PASS",
+        "duration": 0.0161,
+        "result": "{\"confidence\":0.0,\"confidence_level\":\"none\",\"drug_name\":null,\"duration\":null,\"error\":\"Missing quantity. Please include a number (e.g., 'Take 1 tablet...'). (near: 'tab po qd')\\nSuggestions:\\n  - Did you mean: 'Take 1 tab...'?\\n  - Did you mean: 'Give 2 capsules...'?\",\"frequency\":null,\"indication\":null,\"quantity\":null,\"requires_review\":true,\"route\":null,\"success\":false,\"unit\":null,\"validation\":{\"errors\":[\"Missing quantity. Please include a number (e.g., 'Take 1 tablet...'). (near: 'tab po qd')\\nSuggestions:\\n  - Did you mean: 'Take 1 tab...'?\\n  - Did you mean: 'Give 2 capsules...'?\"],\"is_valid\":false,\"suggestions\":[],\"warnings\":[]}}"
+      }
+    ]
+  }
+}

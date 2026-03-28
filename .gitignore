@@ -1,0 +1,42 @@
+# Rust build artifacts
+/target
+Cargo.lock
+
+# WebAssembly build artifacts
+/pkg
+*.wasm
+
+# Node.js
+node_modules/
+package-lock.json
+.npm
+
+# Transformers.js cache
+.cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.local
+
+# Test outputs
+test-results/
+coverage/
+
+# Temporary files
+*.tmp
+*.temp
