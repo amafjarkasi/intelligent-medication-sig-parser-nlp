@@ -1,0 +1,603 @@
+node sandbox.js
+============================================================
+Wasmer Edge.js Isolation Layer
+============================================================
+
+To run this script with additional WebAssembly sandboxing:
+
+  1. Install Edge.js:
+     curl -fsSL https://edgejs.org/install | bash
+
+  2. Run with safe mode (full isolation):
+     edge --safe sandbox.js
+
+Edge.js provides:
+  - WebAssembly sandboxing of system calls
+  - WASIX-based isolation layer
+  - Native module sandboxing via NAPI
+  - ~5-30% performance overhead vs native Node.js
+
+ML Model Security:
+  - NuExtract-tiny runs locally via Transformers.js
+  - Model downloaded once, cached locally
+  - No data sent to external APIs during inference
+  - WASM/WebGPU backend for sandboxed execution
+
+============================================================
+Test Case: Medical Sig Parsing with ML Fallback
+============================================================
+
+Input: "Take 1 tab po qd"
+
+[INFO] WASM binary loaded: 372959 bytes
+[INFO] WASM module initialized successfully
+
+[1/2] Attempting Rust parser...
+      Rust result: SUCCESS (16.97ms)
+
+Output (JSON):
+{
+  "confidence": 100,
+  "confidence_level": "high",
+  "drug_name": null,
+  "duration": null,
+  "frequency": "once_daily",
+  "indication": null,
+  "quantity": "1",
+  "requires_review": false,
+  "route": "oral",
+  "success": true,
+  "unit": "tab",
+  "validation": {
+    "errors": [],
+    "is_valid": true,
+    "suggestions": [],
+    "warnings": []
+  },
+  "parse_time_ms": 16.974500000000035,
+  "parser_used": "rust"
+}
+
+Structured Result:
+  Parser Used:  rust
+  Parse Time:   16.97ms
+  Quantity:     1
+  Unit:         tab
+  Route:        oral
+  Frequency:    once_daily
+  Drug Name:    N/A
+  Confidence:   high
+  Review Req:   No
+
+============================================================
+Additional Test Cases (with ML Fallback)
+============================================================
+
+Input: "Give 500 ml IV BID"
+[1/2] Attempting Rust parser...
+      Rust result: SUCCESS (0.39ms)
+  → Parser: rust, qty: 500, unit: ml, route: intravenous, freq: twice_daily
+  → Time: 0.39ms
+
+Input: "2 tabs"
+[1/2] Attempting Rust parser...
+      Rust result: SUCCESS (0.47ms)
+  → Parser: rust, qty: 2, unit: tab, route: null, freq: null
+  → Time: 0.47ms
+
+Input: "Administer 10 ml po tid"
+[1/2] Attempting Rust parser...
+      Rust result: SUCCESS (0.20ms)
+  → Parser: rust, qty: 10, unit: ml, route: oral, freq: three_times_daily
+  → Time: 0.20ms
+
+Input: "Take 1 tab qd"
+[1/2] Attempting Rust parser...
+      Rust result: SUCCESS (0.17ms)
+  → Parser: rust, qty: 1, unit: tab, route: null, freq: once_daily
+  → Time: 0.17ms
+
+Input: "Patient should take one aspirin daily for headache"
+[1/2] Attempting Rust parser...
+      Rust result: FAILED (1.51ms)
+[2/2] Rust failed, attempting ML fallback...
+============================================================
+Initializing ML Fallback Pipeline
+============================================================
+
+Model: Xenova/nuextract-tiny
+Quantized: Yes (8-bit)
+Cache Directory: C:\Users\jbdt\.qoderwork\workspace\mna57kgigngsr93z\medical-data-normalizer\.cache\transformers
+Offline Mode: No
+
+ℹ Model not cached - will attempt download (~50MB)
+  (Download requires network access)
+
+✗ Failed to initialize ML pipeline: Unauthorized access to file: "https://huggingface.co/Xenova/nuextract-tiny/resolve/main/tokenizer.json".
+  This environment restricts network access.
+  To use ML fallback:
+  1. Run once without Edge.js --safe to download the model
+  2. Or manually download the model to: C:\Users\jbdt\.qoderwork\workspace\mna57kgigngsr93z\medical-data-normalizer\.cache\transformers
+  3. Then run with Edge.js --safe for sandboxed execution
+  Continuing with Rust parser only...
+
+  → Parser: rust, qty: null, unit: null, route: null, freq: null
+  → Time: 1.51ms
+
+Input: "Apply cream to affected area twice a day"
+[1/2] Attempting Rust parser...
+      Rust result: FAILED (0.35ms)
+[2/2] Rust failed, attempting ML fallback...
+============================================================
+Initializing ML Fallback Pipeline
+============================================================
+
+Model: Xenova/nuextract-tiny
+Quantized: Yes (8-bit)
+Cache Directory: C:\Users\jbdt\.qoderwork\workspace\mna57kgigngsr93z\medical-data-normalizer\.cache\transformers
+Offline Mode: No
+
+ℹ Model not cached - will attempt download (~50MB)
+  (Download requires network access)
+
+✗ Failed to initialize ML pipeline: Unauthorized access to file: "https://huggingface.co/Xenova/nuextract-tiny/resolve/main/config.json".
+  This environment restricts network access.
+  To use ML fallback:
+  1. Run once without Edge.js --safe to download the model
+  2. Or manually download the model to: C:\Users\jbdt\.qoderwork\workspace\mna57kgigngsr93z\medical-data-normalizer\.cache\transformers
+  3. Then run with Edge.js --safe for sandboxed execution
+  Continuing with Rust parser only...
+
+  → Parser: rust, qty: null, unit: null, route: null, freq: null
+  → Time: 0.35ms
+
+Input: "Use inhaler every 4 hours as needed for asthma"
+[1/2] Attempting Rust parser...
+      Rust result: FAILED (0.47ms)
+[2/2] Rust failed, attempting ML fallback...
+============================================================
+Initializing ML Fallback Pipeline
+============================================================
+
+Model: Xenova/nuextract-tiny
+Quantized: Yes (8-bit)
+Cache Directory: C:\Users\jbdt\.qoderwork\workspace\mna57kgigngsr93z\medical-data-normalizer\.cache\transformers
+Offline Mode: No
+
+ℹ Model not cached - will attempt download (~50MB)
+  (Download requires network access)
+
+✗ Failed to initialize ML pipeline: Unauthorized access to file: "https://huggingface.co/Xenova/nuextract-tiny/resolve/main/tokenizer.json".
+  This environment restricts network access.
+  To use ML fallback:
+  1. Run once without Edge.js --safe to download the model
+  2. Or manually download the model to: C:\Users\jbdt\.qoderwork\workspace\mna57kgigngsr93z\medical-data-normalizer\.cache\transformers
+  3. Then run with Edge.js --safe for sandboxed execution
+  Continuing with Rust parser only...
+
+  → Parser: rust, qty: null, unit: null, route: null, freq: null
+  → Time: 0.47ms
+
+Input: "Inject 10 units insulin subcutaneously before meals"
+[1/2] Attempting Rust parser...
+      Rust result: FAILED (0.46ms)
+[2/2] Rust failed, attempting ML fallback...
+============================================================
+Initializing ML Fallback Pipeline
+============================================================
+
+Model: Xenova/nuextract-tiny
+Quantized: Yes (8-bit)
+Cache Directory: C:\Users\jbdt\.qoderwork\workspace\mna57kgigngsr93z\medical-data-normalizer\.cache\transformers
+Offline Mode: No
+
+ℹ Model not cached - will attempt download (~50MB)
+  (Download requires network access)
+
+✗ Failed to initialize ML pipeline: Unauthorized access to file: "https://huggingface.co/Xenova/nuextract-tiny/resolve/main/tokenizer.json".
+  This environment restricts network access.
+  To use ML fallback:
+  1. Run once without Edge.js --safe to download the model
+  2. Or manually download the model to: C:\Users\jbdt\.qoderwork\workspace\mna57kgigngsr93z\medical-data-normalizer\.cache\transformers
+  3. Then run with Edge.js --safe for sandboxed execution
+  Continuing with Rust parser only...
+
+  → Parser: rust, qty: null, unit: null, route: null, freq: null
+  → Time: 0.46ms
+
+Input: "Take metformin 500mg by mouth with breakfast"
+[1/2] Attempting Rust parser...
+      Rust result: FAILED (0.96ms)
+[2/2] Rust failed, attempting ML fallback...
+============================================================
+Initializing ML Fallback Pipeline
+============================================================
+
+Model: Xenova/nuextract-tiny
+Quantized: Yes (8-bit)
+Cache Directory: C:\Users\jbdt\.qoderwork\workspace\mna57kgigngsr93z\medical-data-normalizer\.cache\transformers
+Offline Mode: No
+
+ℹ Model not cached - will attempt download (~50MB)
+  (Download requires network access)
+
+✗ Failed to initialize ML pipeline: Unauthorized access to file: "https://huggingface.co/Xenova/nuextract-tiny/resolve/main/config.json".
+  This environment restricts network access.
+  To use ML fallback:
+  1. Run once without Edge.js --safe to download the model
+  2. Or manually download the model to: C:\Users\jbdt\.qoderwork\workspace\mna57kgigngsr93z\medical-data-normalizer\.cache\transformers
+  3. Then run with Edge.js --safe for sandboxed execution
+  Continuing with Rust parser only...
+
+  → Parser: rust, qty: null, unit: null, route: null, freq: null
+  → Time: 0.96ms
+
+Input: "Instill 2 drops in each eye at bedtime"
+[1/2] Attempting Rust parser...
+      Rust result: FAILED (0.68ms)
+[2/2] Rust failed, attempting ML fallback...
+============================================================
+Initializing ML Fallback Pipeline
+============================================================
+
+Model: Xenova/nuextract-tiny
+Quantized: Yes (8-bit)
+Cache Directory: C:\Users\jbdt\.qoderwork\workspace\mna57kgigngsr93z\medical-data-normalizer\.cache\transformers
+Offline Mode: No
+
+ℹ Model not cached - will attempt download (~50MB)
+  (Download requires network access)
+
+✗ Failed to initialize ML pipeline: Unauthorized access to file: "https://huggingface.co/Xenova/nuextract-tiny/resolve/main/config.json".
+  This environment restricts network access.
+  To use ML fallback:
+  1. Run once without Edge.js --safe to download the model
+  2. Or manually download the model to: C:\Users\jbdt\.qoderwork\workspace\mna57kgigngsr93z\medical-data-normalizer\.cache\transformers
+  3. Then run with Edge.js --safe for sandboxed execution
+  Continuing with Rust parser only...
+
+  → Parser: rust, qty: null, unit: null, route: null, freq: null
+  → Time: 0.68ms
+
+============================================================
+Edge Case Tests (with ML Fallback)
+============================================================
+
+[1/2] Attempting Rust parser...
+      Rust result: SUCCESS (0.26ms)
+Test: Standard format
+  Input: "1 tab po qd"
+  Parser: rust
+  → qty: 1, unit: tab, route: oral, freq: once_daily
+
+[1/2] Attempting Rust parser...
+      Rust result: SUCCESS (0.20ms)
+Test: Full words
+  Input: "Take 1 tablet by mouth daily"
+  Parser: rust
+  → qty: 1, unit: tab, route: oral, freq: once_daily
+
+[1/2] Attempting Rust parser...
+      Rust result: FAILED (0.41ms)
+[2/2] Rust failed, attempting ML fallback...
+============================================================
+Initializing ML Fallback Pipeline
+============================================================
+
+Model: Xenova/nuextract-tiny
+Quantized: Yes (8-bit)
+Cache Directory: C:\Users\jbdt\.qoderwork\workspace\mna57kgigngsr93z\medical-data-normalizer\.cache\transformers
+Offline Mode: No
+
+ℹ Model not cached - will attempt download (~50MB)
+  (Download requires network access)
+
+✗ Failed to initialize ML pipeline: Unauthorized access to file: "https://huggingface.co/Xenova/nuextract-tiny/resolve/main/tokenizer.json".
+  This environment restricts network access.
+  To use ML fallback:
+  1. Run once without Edge.js --safe to download the model
+  2. Or manually download the model to: C:\Users\jbdt\.qoderwork\workspace\mna57kgigngsr93z\medical-data-normalizer\.cache\transformers
+  3. Then run with Edge.js --safe for sandboxed execution
+  Continuing with Rust parser only...
+
+Test: Verbose instruction
+  Input: "Give the patient 2 capsules orally every morning"
+  Parser: rust
+  → qty: null, unit: null, route: null, freq: null
+
+[1/2] Attempting Rust parser...
+      Rust result: FAILED (0.29ms)
+[2/2] Rust failed, attempting ML fallback...
+============================================================
+Initializing ML Fallback Pipeline
+============================================================
+
+Model: Xenova/nuextract-tiny
+Quantized: Yes (8-bit)
+Cache Directory: C:\Users\jbdt\.qoderwork\workspace\mna57kgigngsr93z\medical-data-normalizer\.cache\transformers
+Offline Mode: No
+
+ℹ Model not cached - will attempt download (~50MB)
+  (Download requires network access)
+
+✗ Failed to initialize ML pipeline: Unauthorized access to file: "https://huggingface.co/Xenova/nuextract-tiny/resolve/main/tokenizer_config.json".
+  This environment restricts network access.
+  To use ML fallback:
+  1. Run once without Edge.js --safe to download the model
+  2. Or manually download the model to: C:\Users\jbdt\.qoderwork\workspace\mna57kgigngsr93z\medical-data-normalizer\.cache\transformers
+  3. Then run with Edge.js --safe for sandboxed execution
+  Continuing with Rust parser only...
+
+Test: Extended release patch
+  Input: "Apply 1 patch to skin q72h"
+  Parser: rust
+  → qty: null, unit: null, route: null, freq: null
+
+[1/2] Attempting Rust parser...
+      Rust result: FAILED (0.24ms)
+[2/2] Rust failed, attempting ML fallback...
+============================================================
+Initializing ML Fallback Pipeline
+============================================================
+
+Model: Xenova/nuextract-tiny
+Quantized: Yes (8-bit)
+Cache Directory: C:\Users\jbdt\.qoderwork\workspace\mna57kgigngsr93z\medical-data-normalizer\.cache\transformers
+Offline Mode: No
+
+ℹ Model not cached - will attempt download (~50MB)
+  (Download requires network access)
+
+✗ Failed to initialize ML pipeline: Unauthorized access to file: "https://huggingface.co/Xenova/nuextract-tiny/resolve/main/tokenizer.json".
+  This environment restricts network access.
+  To use ML fallback:
+  1. Run once without Edge.js --safe to download the model
+  2. Or manually download the model to: C:\Users\jbdt\.qoderwork\workspace\mna57kgigngsr93z\medical-data-normalizer\.cache\transformers
+  3. Then run with Edge.js --safe for sandboxed execution
+  Continuing with Rust parser only...
+
+Test: PRN inhaler
+  Input: "Inhale 2 puffs from inhaler every 4 hours as needed"
+  Parser: rust
+  → qty: null, unit: null, route: null, freq: null
+
+[1/2] Attempting Rust parser...
+      Rust result: FAILED (0.41ms)
+[2/2] Rust failed, attempting ML fallback...
+============================================================
+Initializing ML Fallback Pipeline
+============================================================
+
+Model: Xenova/nuextract-tiny
+Quantized: Yes (8-bit)
+Cache Directory: C:\Users\jbdt\.qoderwork\workspace\mna57kgigngsr93z\medical-data-normalizer\.cache\transformers
+Offline Mode: No
+
+ℹ Model not cached - will attempt download (~50MB)
+  (Download requires network access)
+
+✗ Failed to initialize ML pipeline: Unauthorized access to file: "https://huggingface.co/Xenova/nuextract-tiny/resolve/main/config.json".
+  This environment restricts network access.
+  To use ML fallback:
+  1. Run once without Edge.js --safe to download the model
+  2. Or manually download the model to: C:\Users\jbdt\.qoderwork\workspace\mna57kgigngsr93z\medical-data-normalizer\.cache\transformers
+  3. Then run with Edge.js --safe for sandboxed execution
+  Continuing with Rust parser only...
+
+Test: Drug name first
+  Input: "Take metformin 500mg with meals"
+  Parser: rust
+  → qty: null, unit: null, route: null, freq: null
+
+[1/2] Attempting Rust parser...
+      Rust result: FAILED (0.27ms)
+[2/2] Rust failed, attempting ML fallback...
+============================================================
+Initializing ML Fallback Pipeline
+============================================================
+
+Model: Xenova/nuextract-tiny
+Quantized: Yes (8-bit)
+Cache Directory: C:\Users\jbdt\.qoderwork\workspace\mna57kgigngsr93z\medical-data-normalizer\.cache\transformers
+Offline Mode: No
+
+ℹ Model not cached - will attempt download (~50MB)
+  (Download requires network access)
+
+✗ Failed to initialize ML pipeline: Unauthorized access to file: "https://huggingface.co/Xenova/nuextract-tiny/resolve/main/tokenizer.json".
+  This environment restricts network access.
+  To use ML fallback:
+  1. Run once without Edge.js --safe to download the model
+  2. Or manually download the model to: C:\Users\jbdt\.qoderwork\workspace\mna57kgigngsr93z\medical-data-normalizer\.cache\transformers
+  3. Then run with Edge.js --safe for sandboxed execution
+  Continuing with Rust parser only...
+
+Test: Nasal spray
+  Input: "Patient should use 1 spray in each nostril BID"
+  Parser: rust
+  → qty: null, unit: null, route: null, freq: null
+
+[1/2] Attempting Rust parser...
+      Rust result: FAILED (0.23ms)
+[2/2] Rust failed, attempting ML fallback...
+============================================================
+Initializing ML Fallback Pipeline
+============================================================
+
+Model: Xenova/nuextract-tiny
+Quantized: Yes (8-bit)
+Cache Directory: C:\Users\jbdt\.qoderwork\workspace\mna57kgigngsr93z\medical-data-normalizer\.cache\transformers
+Offline Mode: No
+
+ℹ Model not cached - will attempt download (~50MB)
+  (Download requires network access)
+
+✗ Failed to initialize ML pipeline: Unauthorized access to file: "https://huggingface.co/Xenova/nuextract-tiny/resolve/main/tokenizer_config.json".
+  This environment restricts network access.
+  To use ML fallback:
+  1. Run once without Edge.js --safe to download the model
+  2. Or manually download the model to: C:\Users\jbdt\.qoderwork\workspace\mna57kgigngsr93z\medical-data-normalizer\.cache\transformers
+  3. Then run with Edge.js --safe for sandboxed execution
+  Continuing with Rust parser only...
+
+Test: Vague instruction
+  Input: "Take as directed"
+  Parser: rust
+  → qty: null, unit: null, route: null, freq: null
+
+[1/2] Attempting Rust parser...
+      Rust result: FAILED (0.32ms)
+[2/2] Rust failed, attempting ML fallback...
+============================================================
+Initializing ML Fallback Pipeline
+============================================================
+
+Model: Xenova/nuextract-tiny
+Quantized: Yes (8-bit)
+Cache Directory: C:\Users\jbdt\.qoderwork\workspace\mna57kgigngsr93z\medical-data-normalizer\.cache\transformers
+Offline Mode: No
+
+ℹ Model not cached - will attempt download (~50MB)
+  (Download requires network access)
+
+✗ Failed to initialize ML pipeline: Unauthorized access to file: "https://huggingface.co/Xenova/nuextract-tiny/resolve/main/tokenizer.json".
+  This environment restricts network access.
+  To use ML fallback:
+  1. Run once without Edge.js --safe to download the model
+  2. Or manually download the model to: C:\Users\jbdt\.qoderwork\workspace\mna57kgigngsr93z\medical-data-normalizer\.cache\transformers
+  3. Then run with Edge.js --safe for sandboxed execution
+  Continuing with Rust parser only...
+
+Test: PRN only
+  Input: "Use as needed for pain"
+  Parser: rust
+  → qty: null, unit: null, route: null, freq: null
+
+[1/2] Attempting Rust parser...
+      Rust result: FAILED (0.20ms)
+[2/2] Rust failed, attempting ML fallback...
+============================================================
+Initializing ML Fallback Pipeline
+============================================================
+
+Model: Xenova/nuextract-tiny
+Quantized: Yes (8-bit)
+Cache Directory: C:\Users\jbdt\.qoderwork\workspace\mna57kgigngsr93z\medical-data-normalizer\.cache\transformers
+Offline Mode: No
+
+ℹ Model not cached - will attempt download (~50MB)
+  (Download requires network access)
+
+✗ Failed to initialize ML pipeline: Unauthorized access to file: "https://huggingface.co/Xenova/nuextract-tiny/resolve/main/tokenizer.json".
+  This environment restricts network access.
+  To use ML fallback:
+  1. Run once without Edge.js --safe to download the model
+  2. Or manually download the model to: C:\Users\jbdt\.qoderwork\workspace\mna57kgigngsr93z\medical-data-normalizer\.cache\transformers
+  3. Then run with Edge.js --safe for sandboxed execution
+  Continuing with Rust parser only...
+
+Test: Empty string
+  Input: ""
+  Parser: rust
+  → qty: null, unit: null, route: null, freq: null
+
+[1/2] Attempting Rust parser...
+      Rust result: FAILED (0.29ms)
+[2/2] Rust failed, attempting ML fallback...
+============================================================
+Initializing ML Fallback Pipeline
+============================================================
+
+Model: Xenova/nuextract-tiny
+Quantized: Yes (8-bit)
+Cache Directory: C:\Users\jbdt\.qoderwork\workspace\mna57kgigngsr93z\medical-data-normalizer\.cache\transformers
+Offline Mode: No
+
+ℹ Model not cached - will attempt download (~50MB)
+  (Download requires network access)
+
+✗ Failed to initialize ML pipeline: Unauthorized access to file: "https://huggingface.co/Xenova/nuextract-tiny/resolve/main/tokenizer.json".
+  This environment restricts network access.
+  To use ML fallback:
+  1. Run once without Edge.js --safe to download the model
+  2. Or manually download the model to: C:\Users\jbdt\.qoderwork\workspace\mna57kgigngsr93z\medical-data-normalizer\.cache\transformers
+  3. Then run with Edge.js --safe for sandboxed execution
+  Continuing with Rust parser only...
+
+Test: Completely invalid
+  Input: "abc def ghi"
+  Parser: rust
+  → qty: null, unit: null, route: null, freq: null
+
+------------------------------------------------------------
+Results: 11 Rust, 0 ML Fallback, 0 Failed
+------------------------------------------------------------
+
+============================================================
+Sandbox Security Features
+============================================================
+
+WebAssembly Sandbox Properties:
+  ✓ Linear memory with bounds checking
+  ✓ No direct access to host memory
+  ✓ Type-safe function calls
+  ✓ No implicit access to system resources
+
+ML Model Security (Transformers.js):
+  ✓ Model runs entirely locally
+  ✓ No external API calls during inference
+  ✓ WASM/WebGPU backend for sandboxed execution
+  ✓ Model cached locally after first download
+  ✓ Quantized 8-bit model (~50MB)
+
+Current Execution Context:
+  ✓ WASM module runs in isolated memory space
+  ✓ ML model runs in Transformers.js sandbox
+  ✓ Memory access validated by runtime
+  ✓ No file system access from WASM/ML code
+  ✓ No network access during inference
+
+For Enhanced Isolation with Edge.js:
+  ✓ Entire Node.js runtime sandboxed in WASM
+  ✓ OS system calls intercepted and controlled
+  ✓ Native modules run in isolated environment
+  ✓ WASIX-based security boundary
+
+============================================================
+All tests completed!
+============================================================
+
+Summary:
+  Primary test input: "Take 1 tab po qd"
+  Parser used: rust
+  Parse time: 16.97ms
+  Rust parses: 11
+  ML fallback parses: 0
+  Failed parses: 0
+
+The hybrid parser combines deterministic Rust parsing
+with ML fallback for maximum compatibility.
+All processing runs locally in the sandbox.
+
+Final JSON Output:
+{
+  "confidence": 100,
+  "confidence_level": "high",
+  "drug_name": null,
+  "duration": null,
+  "frequency": "once_daily",
+  "indication": null,
+  "quantity": "1",
+  "requires_review": false,
+  "route": "oral",
+  "success": true,
+  "unit": "tab",
+  "validation": {
+    "errors": [],
+    "is_valid": true,
+    "suggestions": [],
+    "warnings": []
+  },
+  "parse_time_ms": 16.974500000000035,
+  "parser_used": "rust"
+}
