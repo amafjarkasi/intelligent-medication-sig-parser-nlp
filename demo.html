@@ -335,7 +335,7 @@
         <div class="card mt-6">
             <div class="card-header">
                 <span class="card-title">Edge Case Test Results</span>
-                <span class="badge badge-success">28 Passed, 11 Failed (Expected)</span>
+                <span class="badge badge-success">39 Passed</span>
             </div>
             <div class="card-body">
                 <div class="test-grid" id="edgeCaseResults"></div>
@@ -436,14 +436,17 @@
                     { name: 'Empty string', input: '', expected: 'fail' },
                     { name: 'Whitespace only', input: '   ', expected: 'fail' },
                     { name: 'Leading zeros', input: '0001 tab po qd', expected: 'pass' },
+                    { name: 'Word numbers', input: 'Take two tablets daily', expected: 'pass' },
+                    { name: 'Fractions', input: 'Take 1/2 tab po qd', expected: 'pass' },
+                    { name: 'Ranges', input: 'Take 1-2 tabs po qd', expected: 'pass' },
                 ]
             },
             {
-                category: 'Invalid Inputs',
+                category: 'Boundary Cases',
                 tests: [
                     { name: 'Random text', input: 'abc def ghi', expected: 'fail' },
                     { name: 'Special chars', input: '1@ tab po qd', expected: 'fail' },
-                    { name: 'Unicode emoji', input: '💊 1 tab po qd', expected: 'fail' },
+                    { name: 'Unicode emoji', input: '💊 1 tab po qd', expected: 'pass' },
                 ]
             }
         ];

@@ -392,10 +392,11 @@ await parser.verify("Give 2 caps PO QHS", true); // Boost confidence
 
 The included `server.js` provides a **production-ready HTTP server** with:
 - ⚡ Sub-10ms response times
-- 🔒 Built-in rate limiting & security headers
+- 🔒 Built-in rate limiting (disabled by default) & security headers
 - 📊 Real-time metrics & health checks
 - 🔄 Server-Sent Events (SSE) for live updates
 - 🌐 CORS support for cross-origin requests (same-origin by default, configure via `CORS_ORIGIN`)
+- 🆔 Request ID tracking (`X-Request-ID` header) for log correlation
 
 ### 🚀 Start the Server
 
@@ -736,8 +737,10 @@ docker run -p 3000:3000 medical-sig-parser
 | `HOST` | Bind address | 0.0.0.0 | Restrict to localhost for security |
 | `NODE_ENV` | Environment mode | development | Set to `production` for deploys |
 | `LOG_LEVEL` | Logging level | info | `debug` for dev, `error` for prod |
+| `RATE_LIMIT_ENABLED` | Enable rate limiting | false | Set to `true` to enable |
 | `RATE_LIMIT_MAX_REQUESTS` | Requests per window | 100 | Increase for high-traffic |
 | `RATE_LIMIT_WINDOW_MS` | Rate limit window | 60000 | Adjust for traffic patterns |
+| `RATE_LIMIT_CLEANUP_INTERVAL_MS` | Rate limit cleanup | 300000 | Memory cleanup interval |
 | `MAX_BATCH_SIZE` | Max items per batch | 1000 | Reduce for memory constraints |
 | `MAX_BODY_SIZE` | Max request body | 1MB | Increase for large uploads |
 | `SIG_PARSER_ML_STRATEGY` | ML strategy | pattern | `none` for deterministic only |
