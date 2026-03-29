@@ -44,9 +44,11 @@ const CONFIG = Object.freeze({
   HOST: process.env.HOST || '0.0.0.0',
   NODE_ENV: process.env.NODE_ENV || 'development',
 
-  // Rate limiting
-  RATE_LIMIT_WINDOW_MS: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 60000, // 1 minute
+  // Rate limiting (disabled by default)
+  RATE_LIMIT_ENABLED: process.env.RATE_LIMIT_ENABLED === 'true',
+  RATE_LIMIT_WINDOW_MS: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 60000,
   RATE_LIMIT_MAX_REQUESTS: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100,
+  RATE_LIMIT_CLEANUP_INTERVAL_MS: parseInt(process.env.RATE_LIMIT_CLEANUP_INTERVAL_MS) || 300000, // 5 minutes
 
   // Request limits
   MAX_BODY_SIZE: parseInt(process.env.MAX_BODY_SIZE) || 1024 * 1024, // 1MB
@@ -131,29 +133,31 @@ const metrics = {
 // ============================================================================
 
 class RateLimiter {
-  constructor(windowMs, maxRequests) {
+  constructor(windowMs, maxRequests, enabled) {
     this.windowMs = windowMs;
     this.maxRequests = maxRequests;
+    this.enabled = enabled;
     this.requests = new Map();
   }
 
   isAllowed(clientId) {
+    if (!this.enabled) {
+      return { allowed: true, remaining: this.maxRequests };
+    }
+
     const now = Date.now();
     const windowStart = now - this.windowMs;
 
-    // Get or create client entry
     if (!this.requests.has(clientId)) {
       this.requests.set(clientId, []);
     }
 
     const clientRequests = this.requests.get(clientId);
 
-    // Remove old requests outside the window
     while (clientRequests.length > 0 && clientRequests[0] < windowStart) {
       clientRequests.shift();
     }
 
-    // Check if under limit
     if (clientRequests.length < this.maxRequests) {
       clientRequests.push(now);
       return { allowed: true, remaining: this.maxRequests - clientRequests.length };
@@ -165,9 +169,27 @@ class RateLimiter {
       retryAfter: Math.ceil((clientRequests[0] + this.windowMs - now) / 1000),
     };
   }
+
+  cleanup() {
+    if (!this.enabled) return;
+    const now = Date.now();
+    const windowStart = now - this.windowMs;
+    for (const [clientId, timestamps] of this.requests) {
+      while (timestamps.length > 0 && timestamps[0] < windowStart) {
+        timestamps.shift();
+      }
+      if (timestamps.length === 0) {
+        this.requests.delete(clientId);
+      }
+    }
+  }
 }
 
-const rateLimiter = new RateLimiter(CONFIG.RATE_LIMIT_WINDOW_MS, CONFIG.RATE_LIMIT_MAX_REQUESTS);
+const rateLimiter = new RateLimiter(CONFIG.RATE_LIMIT_WINDOW_MS, CONFIG.RATE_LIMIT_MAX_REQUESTS, CONFIG.RATE_LIMIT_ENABLED);
+
+if (CONFIG.RATE_LIMIT_ENABLED) {
+  setInterval(() => rateLimiter.cleanup(), CONFIG.RATE_LIMIT_CLEANUP_INTERVAL_MS);
+}
 
 // ============================================================================
 // MIME TYPES
@@ -533,6 +555,7 @@ function serveStaticFile(res, filePath) {
 
     res.writeHead(200, {
       'Content-Type': contentType,
+      'Content-Length': data.length,
       'Cache-Control': cacheControl,
       'X-Content-Type-Options': 'nosniff',
     });
@@ -609,7 +632,21 @@ const routes = {
 
     try {
       const body = await parseBody(req);
-      const { input } = JSON.parse(body);
+      let parsed;
+      try {
+        parsed = JSON.parse(body);
+      } catch {
+        metrics.recordRequest('/api/parse', Date.now() - startTime, 400);
+        sendJSON(res, 400, { error: 'Invalid JSON body' });
+        return;
+      }
+      const { input } = parsed;
+
+      if (!input || typeof input !== 'string' || !input.trim()) {
+        metrics.recordRequest('/api/parse', Date.now() - startTime, 400);
+        sendJSON(res, 400, { error: 'Missing or invalid "input" field' });
+        return;
+      }
 
       const result = await parseSingle(input);
       metrics.recordRequest('/api/parse', Date.now() - startTime, 200);
@@ -626,7 +663,27 @@ const routes = {
 
     try {
       const body = await parseBody(req);
-      const { instructions } = JSON.parse(body);
+      let parsed;
+      try {
+        parsed = JSON.parse(body);
+      } catch {
+        metrics.recordRequest('/api/parse/batch', Date.now() - startTime, 400);
+        sendJSON(res, 400, { error: 'Invalid JSON body' });
+        return;
+      }
+      const { instructions } = parsed;
+
+      if (!instructions || !Array.isArray(instructions) || instructions.length === 0) {
+        metrics.recordRequest('/api/parse/batch', Date.now() - startTime, 400);
+        sendJSON(res, 400, { error: 'Missing or invalid "instructions" field (must be non-empty array)' });
+        return;
+      }
+
+      if (instructions.length > CONFIG.MAX_BATCH_SIZE) {
+        metrics.recordRequest('/api/parse/batch', Date.now() - startTime, 400);
+        sendJSON(res, 400, { error: `Batch size exceeds maximum of ${CONFIG.MAX_BATCH_SIZE}` });
+        return;
+      }
 
       const result = await wasmParseBatch(instructions);
       metrics.recordRequest('/api/parse/batch', Date.now() - startTime, 200);
@@ -684,10 +741,18 @@ const routes = {
 // MAIN SERVER
 // ============================================================================
 
+function generateRequestId() {
+  return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+}
+
 const server = http.createServer((req, res) => {
+  const requestId = generateRequestId();
   const startTime = Date.now();
   const url = new URL(req.url, `http://${req.headers.host}`);
   const pathname = url.pathname;
+
+  // Set request ID header
+  res.setHeader('X-Request-ID', requestId);
 
   // Set CORS headers
   setCORSHeaders(res);
@@ -725,13 +790,13 @@ const server = http.createServer((req, res) => {
 
   if (routes[routeKey]) {
     Promise.resolve(routes[routeKey](req, res)).catch(err => {
-      log('error', 'Route handler error', { error: err.message, route: routeKey });
+      log('error', 'Route handler error', { requestId, error: err.message, route: routeKey });
       sendJSON(res, 500, { error: 'Internal server error' });
     });
   } else if (routes[categoryRouteKey]) {
     const id = pathname.split('/').pop();
     Promise.resolve(routes[categoryRouteKey](req, res, { id })).catch(err => {
-      log('error', 'Route handler error', { error: err.message, route: categoryRouteKey });
+      log('error', 'Route handler error', { requestId, error: err.message, route: categoryRouteKey });
       sendJSON(res, 500, { error: 'Internal server error' });
     });
   } else {
@@ -753,6 +818,7 @@ const server = http.createServer((req, res) => {
   res.on('finish', () => {
     const duration = Date.now() - startTime;
     log('debug', 'Request handled', {
+      requestId,
       method: req.method,
       path: pathname,
       status: res.statusCode,

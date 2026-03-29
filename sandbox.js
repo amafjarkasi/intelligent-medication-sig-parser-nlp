@@ -924,7 +924,12 @@ async function runTests(wasmModule) {
 }
 
 async function runBatchFile(filePath, wasmModule) {
-  const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  let data;
+  try {
+    data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  } catch (err) {
+    throw new ValidationError(`Invalid JSON in batch file: ${err.message}`, { path: filePath });
+  }
   const inputs = Array.isArray(data) ? data : data.instructions;
 
   if (!inputs || !Array.isArray(inputs)) {
