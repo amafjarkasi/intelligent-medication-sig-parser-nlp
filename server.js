@@ -606,13 +606,39 @@ function parseBody(req, maxSize = CONFIG.MAX_BODY_SIZE) {
 // ============================================================================
 
 const routes = {
-  // Health check
+  // Health check (basic)
   'GET /health': (req, res) => {
     sendJSON(res, 200, {
       status: 'healthy',
       version: '2.0.0',
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
+    });
+  },
+
+  // Health check (deep - tests WASM parsing)
+  'GET /health/ready': (req, res) => {
+    const checks = {
+      wasm: { status: 'up', name: 'WASM Module' },
+      parse: { status: 'down', name: 'Parse Function' },
+    };
+
+    try {
+      const testResult = JSON.parse(parseSingle('test'));
+      if (testResult && testResult.success !== undefined) {
+        checks.parse.status = 'up';
+      }
+    } catch (err) {
+      checks.parse.error = err.message;
+    }
+
+    const allUp = Object.values(checks).every(c => c.status === 'up');
+    sendJSON(res, allUp ? 200 : 503, {
+      status: allUp ? 'ready' : 'not_ready',
+      version: '2.0.0',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      checks,
     });
   },
 
