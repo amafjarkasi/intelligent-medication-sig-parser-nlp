@@ -16,10 +16,25 @@
  * @author Intelligent Medication Sig Parser Team
  */
 
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
-const { parse_medical_instruction, parse_medical_instructions_batch } = require('./pkg/medical_data_normalizer.js');
+import http from 'http';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load WASM module dynamically
+let wasmModule;
+try {
+  wasmModule = await import('./pkg/medical_data_normalizer.js');
+} catch (err) {
+  console.error('Failed to load WASM module:', err.message);
+  console.error('Make sure to run: wasm-pack build --target nodejs');
+  process.exit(1);
+}
+
+const { parse_medical_instruction, parse_medical_instructions_batch } = wasmModule;
 
 // ============================================================================
 // CONFIGURATION
@@ -713,13 +728,13 @@ const server = http.createServer((req, res) => {
   const categoryRouteKey = `${req.method} ${pathname.replace(/\/[^/]+$/, '/:id')}`;
 
   if (routes[routeKey]) {
-    routes[routeKey](req, res).catch(err => {
+    Promise.resolve(routes[routeKey](req, res)).catch(err => {
       log('error', 'Route handler error', { error: err.message, route: routeKey });
       sendJSON(res, 500, { error: 'Internal server error' });
     });
   } else if (routes[categoryRouteKey]) {
     const id = pathname.split('/').pop();
-    routes[categoryRouteKey](req, res, { id }).catch(err => {
+    Promise.resolve(routes[categoryRouteKey](req, res, { id })).catch(err => {
       log('error', 'Route handler error', { error: err.message, route: categoryRouteKey });
       sendJSON(res, 500, { error: 'Internal server error' });
     });
