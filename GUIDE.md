@@ -1908,9 +1908,7 @@ public class MedicationController {
 ## 📚 Additional Resources
 
 - **API Reference:** See `README.md` for endpoint details
-- **Performance Report:** See `STRESS_TEST_ANALYSIS.md`
 - **Rust Docs:** Run `cargo doc --open` for internal API
-- **Examples:** Check `examples/` directory (if available)
 
 ---
 

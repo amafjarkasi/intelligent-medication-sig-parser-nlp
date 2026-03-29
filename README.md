@@ -178,8 +178,8 @@ const result = JSON.parse(wasm.parse_medical_instruction("Take 1 tab po qd"));
 ### ⚡ One-Liner Test
 
 ```bash
-# Quick verification after build
-node -e "const w=require('./pkg/medical_data_normalizer.js');console.log(JSON.parse(w.parse_medical_instruction('Take 1 tab po qd')))"
+# Quick verification after build (Node.js ESM)
+node --input-type=module -e "import('./pkg/medical_data_normalizer.js').then(m => console.log(JSON.parse(m.parse_medical_instruction('Take 1 tab po qd'))))"
 ```
 
 ## Project Structure
@@ -196,6 +196,7 @@ node -e "const w=require('./pkg/medical_data_normalizer.js');console.log(JSON.pa
 ├── styles.css              # Shared design system
 ├── pattern-learning.js     # Self-learning pattern engine
 ├── comprehensive-test.js   # 1,058 test suite
+├── wasm-wrapper.js         # WASM loader with error handling
 ├── sandbox.js              # Node.js test harness with ML fallback
 └── server.js               # Production-ready Node.js server
 ```
@@ -525,17 +526,18 @@ console.log(result);
 | po, by mouth, orally, p.o. | oral |
 | iv, intravenous | intravenous |
 | im, intramuscular | intramuscular |
-| subq, sc, subcutaneous | subcutaneous |
+| subq, sc, subcutaneous, subcutaneously | subcutaneous |
 | topical, transdermal | topical |
 
 ### Frequencies
 | Input | Normalized |
 |-------|------------|
 | qd, daily | once_daily |
-| bid, twice daily | twice_daily |
-| tid, three times daily | three_times_daily |
+| bid, twice daily, twice a day | twice_daily |
+| tid, three times daily, three times a day | three_times_daily |
 | qid, four times daily | four_times_daily |
 | prn, as needed | as_needed |
+| q72h, every 72 hours | every_72_hours |
 
 ### Units
 | Input | Normalized |
@@ -545,6 +547,7 @@ console.log(result);
 | mg, milligram | mg |
 | ml, cc | ml |
 | mcg, microgram | mcg |
+| suppository, supp | suppository |
 
 ## 🧪 Testing
 
@@ -582,7 +585,7 @@ node server.js
 | Fuzz Testing | 500 | 100% | Random input resilience |
 | **Total** | **1,058** | **100%** | **All tests passing** |
 
-## 📊 Performance (Verified 2026-03-28)
+## 📊 Performance (Verified 2026-03-29)
 
 ### Throughput
 
@@ -930,7 +933,6 @@ end
 ## 📚 Documentation
 
 - **[GUIDE.md](GUIDE.md)** - Comprehensive integration guide with use cases, examples, and best practices
-- **[STRESS_TEST_ANALYSIS.md](STRESS_TEST_ANALYSIS.md)** - Detailed performance and stress test analysis
 
 ## 🤝 Contributing
 
