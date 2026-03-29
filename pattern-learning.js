@@ -117,7 +117,6 @@ class PatternLearningEngine extends EventEmitter {
     // Performance optimization: pre-computed indices
     this._patternIndex = new Map(); // Input hash -> pattern ID
     this._dirty = false;
-    this._saveTimeout = null;
 
     // Initialize
     if (this.config.persistData) {
@@ -131,6 +130,8 @@ class PatternLearningEngine extends EventEmitter {
     if (this.config.persistData) {
       this._setupAutoSave();
     }
+
+    this._boundSaveAll = () => this._saveAll();
 
     this.logger.info('PatternLearningEngine initialized', {
       patterns: this.patterns.size,
@@ -171,8 +172,8 @@ class PatternLearningEngine extends EventEmitter {
     }, 30000);
 
     // Save on process exit
-    process.on('SIGINT', () => this._saveAll());
-    process.on('SIGTERM', () => this._saveAll());
+    process.on('SIGINT', this._boundSaveAll);
+    process.on('SIGTERM', this._boundSaveAll);
   }
 
   // ============================================================================
@@ -237,6 +238,7 @@ class PatternLearningEngine extends EventEmitter {
 
   _savePatterns() {
     const filePath = path.join(this.config.dataDir, this.config.patternFile);
+    const tempFilePath = filePath + '.tmp';
     const data = {
       patterns: Object.fromEntries(this.patterns),
       lastUpdated: Date.now(),
@@ -244,31 +246,45 @@ class PatternLearningEngine extends EventEmitter {
     };
 
     try {
-      fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+      fs.writeFileSync(tempFilePath, JSON.stringify(data, null, 2));
+      fs.renameSync(tempFilePath, filePath);
       this.logger.debug('Saved patterns', { count: this.patterns.size });
     } catch (err) {
       this.logger.error('Failed to save patterns', { error: err.message });
+      if (fs.existsSync(tempFilePath)) {
+        try { fs.unlinkSync(tempFilePath); } catch {}
+      }
     }
   }
 
   _saveAnalytics() {
     const filePath = path.join(this.config.dataDir, this.config.analyticsFile);
+    const tempFilePath = filePath + '.tmp';
     this.analytics.lastUpdated = Date.now();
 
     try {
-      fs.writeFileSync(filePath, JSON.stringify(this.analytics, null, 2));
+      fs.writeFileSync(tempFilePath, JSON.stringify(this.analytics, null, 2));
+      fs.renameSync(tempFilePath, filePath);
     } catch (err) {
       this.logger.error('Failed to save analytics', { error: err.message });
+      if (fs.existsSync(tempFilePath)) {
+        try { fs.unlinkSync(tempFilePath); } catch {}
+      }
     }
   }
 
   _saveFeedback() {
     const filePath = path.join(this.config.dataDir, this.config.feedbackFile);
+    const tempFilePath = filePath + '.tmp';
 
     try {
-      fs.writeFileSync(filePath, JSON.stringify(this.feedbackHistory, null, 2));
+      fs.writeFileSync(tempFilePath, JSON.stringify(this.feedbackHistory, null, 2));
+      fs.renameSync(tempFilePath, filePath);
     } catch (err) {
       this.logger.error('Failed to save feedback', { error: err.message });
+      if (fs.existsSync(tempFilePath)) {
+        try { fs.unlinkSync(tempFilePath); } catch {}
+      }
     }
   }
 
@@ -718,6 +734,12 @@ class PatternLearningEngine extends EventEmitter {
       throw new Error('Invalid pattern data: missing patterns object');
     }
 
+    for (const [id, pattern] of Object.entries(data.patterns)) {
+      if (!pattern.input || !pattern.result || typeof pattern.confidence !== 'number') {
+        throw new Error(`Invalid pattern structure for id: ${id}`);
+      }
+    }
+
     const importedPatterns = new Map(Object.entries(data.patterns));
 
     if (options.merge) {
@@ -767,6 +789,10 @@ class PatternLearningEngine extends EventEmitter {
       clearInterval(this._autoSaveInterval);
       this._autoSaveInterval = null;
     }
+
+    process.removeListener('SIGINT', this._boundSaveAll);
+    process.removeListener('SIGTERM', this._boundSaveAll);
+
     this._saveAll();
     this.removeAllListeners();
     this.patterns.clear();
