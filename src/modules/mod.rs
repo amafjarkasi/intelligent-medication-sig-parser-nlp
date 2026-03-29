@@ -8,9 +8,9 @@
 //! - confidence: Confidence scoring algorithms
 //! - errors: Error handling and suggestion generation
 
-pub mod medical_data;
-pub mod validation;
-pub mod normalization;
-pub mod fhir;
 pub mod confidence;
 pub mod errors;
+pub mod fhir;
+pub mod medical_data;
+pub mod normalization;
+pub mod validation;

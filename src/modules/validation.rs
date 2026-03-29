@@ -8,9 +8,17 @@
 //! - Frequency validation
 
 use crate::modules::medical_data::{
-    lookup_medication, lookup_unit, lookup_route, lookup_frequency,
-    DOSAGE_LIMITS, ValidationReport
+    lookup_frequency, lookup_medication, lookup_route, lookup_unit, DOSAGE_LIMITS,
 };
+
+/// Validation report for a complete medication order
+#[derive(Debug, Clone)]
+pub struct ValidationReport {
+    pub is_valid: bool,
+    pub errors: Vec<String>,
+    pub warnings: Vec<String>,
+    pub suggestions: Vec<String>,
+}
 
 /// Input validation result
 #[derive(Debug, Clone)]
@@ -30,10 +38,16 @@ pub fn validate_input(input: &str) -> InputValidationResult {
     }
 
     // Check for control characters (security/data quality)
-    if input.chars().any(|c| c.is_ascii_control() && c != '\t' && c != '\n' && c != '\r') {
+    if input
+        .chars()
+        .any(|c| c.is_ascii_control() && c != '\t' && c != '\n' && c != '\r')
+    {
         return InputValidationResult {
             is_valid: false,
-            error_message: Some("Input contains invalid control characters. Please use only printable characters.".to_string()),
+            error_message: Some(
+                "Input contains invalid control characters. Please use only printable characters."
+                    .to_string(),
+            ),
         };
     }
 
@@ -49,7 +63,9 @@ pub fn validate_input(input: &str) -> InputValidationResult {
     if input.contains('\0') {
         return InputValidationResult {
             is_valid: false,
-            error_message: Some("Input contains null bytes. Please provide valid text.".to_string()),
+            error_message: Some(
+                "Input contains null bytes. Please provide valid text.".to_string(),
+            ),
         };
     }
 
@@ -69,7 +85,11 @@ pub struct DosageValidationResult {
 }
 
 /// Validate dosage quantity and unit
-pub fn validate_dosage(quantity: &str, unit: Option<&str>, medication: Option<&str>) -> DosageValidationResult {
+pub fn validate_dosage(
+    quantity: &str,
+    unit: Option<&str>,
+    medication: Option<&str>,
+) -> DosageValidationResult {
     let mut result = DosageValidationResult {
         is_valid: true,
         warnings: Vec::new(),
@@ -80,7 +100,9 @@ pub fn validate_dosage(quantity: &str, unit: Option<&str>, medication: Option<&s
     let qty: f64 = match quantity.parse() {
         Ok(q) => q,
         Err(_) => {
-            result.errors.push(format!("Invalid quantity: '{}'", quantity));
+            result
+                .errors
+                .push(format!("Invalid quantity: '{}'", quantity));
             result.is_valid = false;
             return result;
         }
@@ -88,13 +110,17 @@ pub fn validate_dosage(quantity: &str, unit: Option<&str>, medication: Option<&s
 
     // Check for negative or zero
     if qty <= 0.0 {
-        result.errors.push("Quantity must be greater than zero".to_string());
+        result
+            .errors
+            .push("Quantity must be greater than zero".to_string());
         result.is_valid = false;
     }
 
     // Check for negative sign in original string (catches -0, -0.0, etc.)
     if quantity.starts_with('-') {
-        result.errors.push("Negative quantities are not valid for medication dosing".to_string());
+        result
+            .errors
+            .push("Negative quantities are not valid for medication dosing".to_string());
         result.is_valid = false;
     }
 
@@ -122,8 +148,12 @@ pub fn validate_dosage(quantity: &str, unit: Option<&str>, medication: Option<&s
                 if qty < med.typical_dose_range.0 || qty > med.typical_dose_range.1 {
                     result.warnings.push(format!(
                         "{} dose of {} {} is outside typical range ({}-{} {})",
-                        med.generic_name, qty, unit_str,
-                        med.typical_dose_range.0, med.typical_dose_range.1, med.common_unit
+                        med.generic_name,
+                        qty,
+                        unit_str,
+                        med.typical_dose_range.0,
+                        med.typical_dose_range.1,
+                        med.common_unit
                     ));
                 }
             }
@@ -198,8 +228,12 @@ pub fn validate_medication_order(
                 if quantity < med.typical_dose_range.0 || quantity > med.typical_dose_range.1 {
                     report.warnings.push(format!(
                         "{} dose of {} {} is outside typical range ({}-{} {})",
-                        med.generic_name, quantity, unit_str,
-                        med.typical_dose_range.0, med.typical_dose_range.1, med.common_unit
+                        med.generic_name,
+                        quantity,
+                        unit_str,
+                        med.typical_dose_range.0,
+                        med.typical_dose_range.1,
+                        med.common_unit
                     ));
                 }
             }
@@ -216,12 +250,16 @@ pub fn validate_medication_order(
 
     // Validate quantity
     if quantity <= 0.0 {
-        report.errors.push("Quantity must be greater than zero".to_string());
+        report
+            .errors
+            .push("Quantity must be greater than zero".to_string());
         report.is_valid = false;
     }
 
     if quantity > 10000.0 {
-        report.warnings.push("Quantity is unusually large".to_string());
+        report
+            .warnings
+            .push("Quantity is unusually large".to_string());
     }
 
     // Validate unit
@@ -241,7 +279,9 @@ pub fn validate_medication_order(
     // Validate frequency
     if let Some(f) = frequency {
         if lookup_frequency(f).is_none() {
-            report.warnings.push(format!("Unrecognized frequency: {}", f));
+            report
+                .warnings
+                .push(format!("Unrecognized frequency: {}", f));
         }
     }
 

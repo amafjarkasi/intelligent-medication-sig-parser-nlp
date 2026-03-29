@@ -5,6 +5,8 @@
 
 use serde_json::json;
 
+use serde_json::json;
+
 /// Generate FHIR R4 Dosage format from parsed components
 pub fn generate_fhir_output(
     quantity: Option<&str>,
@@ -30,47 +32,26 @@ pub fn generate_fhir_output(
         fhir.insert("text".to_string(), json!(text_parts.join(" ")));
     }
 
-    // Timing
+    // Timing - use the FHIR timing data from the frequency database
     if let Some(freq) = frequency {
         let timing = match freq.as_ref() {
-            "once_daily" | "daily" => json!({
-                "repeat": { "frequency": 1, "period": 1, "periodUnit": "d" }
-            }),
-            "twice_daily" => json!({
-                "repeat": { "frequency": 2, "period": 1, "periodUnit": "d" }
-            }),
-            "three_times_daily" => json!({
-                "repeat": { "frequency": 3, "period": 1, "periodUnit": "d" }
-            }),
-            "four_times_daily" => json!({
-                "repeat": { "frequency": 4, "period": 1, "periodUnit": "d" }
-            }),
-            "every_4_hours" => json!({
-                "repeat": { "frequency": 1, "period": 4, "periodUnit": "h" }
-            }),
-            "every_6_hours" => json!({
-                "repeat": { "frequency": 1, "period": 6, "periodUnit": "h" }
-            }),
-            "every_8_hours" => json!({
-                "repeat": { "frequency": 1, "period": 8, "periodUnit": "h" }
-            }),
-            "every_12_hours" => json!({
-                "repeat": { "frequency": 1, "period": 12, "periodUnit": "h" }
-            }),
-            "every_24_hours" => json!({
-                "repeat": { "frequency": 1, "period": 24, "periodUnit": "h" }
-            }),
-            "once_weekly" => json!({
-                "repeat": { "frequency": 1, "period": 1, "periodUnit": "wk" }
-            }),
-            "monthly" => json!({
-                "repeat": { "frequency": 1, "period": 1, "periodUnit": "mo" }
-            }),
             "as_needed" => json!({ "asNeededBoolean": true }),
             "at_bedtime" => json!({
                 "repeat": { "when": ["HS"] }
             }),
-            _ => json!(null),
+            _ => {
+                // Use pre-computed FHIR timing string from frequency database
+                let freq_data = crate::modules::medical_data::lookup_frequency(freq);
+                if let Some(data) = freq_data {
+                    if let Some(timing_str) = data.fhir_timing {
+                        serde_json::from_str(timing_str).unwrap_or(json!(null))
+                    } else {
+                        json!(null)
+                    }
+                } else {
+                    json!(null)
+                }
+            }
         };
         if !timing.is_null() {
             fhir.insert("timing".to_string(), timing);
@@ -95,25 +76,31 @@ pub fn generate_fhir_output(
             _ => ("", ""),
         };
         if !route_code.0.is_empty() {
-            fhir.insert("route".to_string(), json!({
-                "coding": [{
-                    "system": "http://snomed.info/sct",
-                    "code": route_code.0,
-                    "display": route_code.1
-                }]
-            }));
+            fhir.insert(
+                "route".to_string(),
+                json!({
+                    "coding": [{
+                        "system": "http://snomed.info/sct",
+                        "code": route_code.0,
+                        "display": route_code.1
+                    }]
+                }),
+            );
         }
     }
 
     // Dose
     if let (Some(q), Some(u)) = (quantity, unit) {
         if let Ok(val) = q.parse::<f64>() {
-            fhir.insert("doseAndRate".to_string(), json!([{
-                "doseQuantity": {
-                    "value": val,
-                    "unit": u
-                }
-            }]));
+            fhir.insert(
+                "doseAndRate".to_string(),
+                json!([{
+                    "doseQuantity": {
+                        "value": val,
+                        "unit": u
+                    }
+                }]),
+            );
         }
     }
 

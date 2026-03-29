@@ -22,9 +22,25 @@ WHITESPACE = _{ " " | "\t" | "\n" | "\r" }
 // CORE COMPONENTS
 // ============================================================================
 
-// Quantity: integer or decimal number
-// Examples: 1, 2.5, 0.5, 1000
-quantity = @{ ASCII_DIGIT+ ~ ("." ~ ASCII_DIGIT+)? }
+// Quantity: integer, decimal, fractional, range, or word number
+// Examples: 1, 2.5, 0.5, 1000, 1/2, 1-2, one, two, ten
+quantity = @{
+    range_quantity
+  | fractional_quantity
+  | decimal_quantity
+  | word_quantity
+}
+
+decimal_quantity = @{ ASCII_DIGIT+ ~ ("." ~ ASCII_DIGIT+)? }
+
+fractional_quantity = @{ ASCII_DIGIT+ ~ "/" ~ ASCII_DIGIT+ }
+
+range_quantity = @{ decimal_quantity ~ "-" ~ decimal_quantity }
+
+word_quantity = @{
+    "ten" | "nine" | "eight" | "seven" | "six" | "five" | "four" | "three" | "two" | "one"
+    | "half"
+}
 
 // ============================================================================
 // UNITS
@@ -76,6 +92,8 @@ unit = @{
 route = @{
     // ORAL - Multi-word first
     "by mouth" | "per os" | "under tongue"
+    // ORAL - Full words and variants
+  | "orally" | "oral"
     // ORAL - Abbreviations
   | "p.o." | "po"
     // INTRAVENOUS - Full word first
@@ -225,7 +243,7 @@ optional_word = @{
 // FILLER WORDS (Ignored during parsing)
 // ============================================================================
 
-filler_word = { "a" | "an" | "for" | "me" | "of" | "patient" | "the" | "to" }
+filler_word = { "a" | "an" | "me" | "of" | "patient" | "the" | "to" }
 
 // ============================================================================
 // DRUG NAMES (Optional recognition)

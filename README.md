@@ -18,6 +18,8 @@ Intelligent Medication Sig Parser with NLP transforms unstructured medication in
 
 Unlike cloud-based parsers that send sensitive medical data to external servers, this parser runs **100% locally** in a WebAssembly sandbox — ensuring patient data never leaves your infrastructure. It processes **114,000+ operations per second** with **8μs average latency**, maintains **100% security** across all attack vectors, and **learns from your data** to improve accuracy over time.
 
+Supports abbreviations (`1 tab po bid`), full words (`Take two tablets by mouth daily`), fractions (`1/2 tab`), ranges (`1-2 tabs`), and word numbers (`Take one tablet`).
+
 ### 🌟 Key Differentiators
 
 | Feature | Traditional Cloud Parsers | Intelligent Medication Sig Parser |
@@ -392,7 +394,7 @@ The included `server.js` provides a **production-ready HTTP server** with:
 - 🔒 Built-in rate limiting & security headers
 - 📊 Real-time metrics & health checks
 - 🔄 Server-Sent Events (SSE) for live updates
-- 🌐 CORS support for cross-origin requests
+- 🌐 CORS support for cross-origin requests (same-origin by default, configure via `CORS_ORIGIN`)
 
 ### 🚀 Start the Server
 
@@ -508,10 +510,19 @@ console.log(result);
 
 ## 📋 Supported Formats
 
+### Quantities
+| Input | Normalized |
+|-------|------------|
+| 1, 2, 500 | 1, 2, 500 |
+| 2.5, 0.5 | 2.5, 0.5 |
+| 1/2, 3/4 | 0.5, 0.75 |
+| 1-2, 250-500 | 1-2, 250-500 |
+| one, two, half | 1, 2, 0.5 |
+
 ### Routes
 | Input | Normalized |
 |-------|------------|
-| po, by mouth, orally | oral |
+| po, by mouth, orally, p.o. | oral |
 | iv, intravenous | intravenous |
 | im, intramuscular | intramuscular |
 | subq, sc, subcutaneous | subcutaneous |
@@ -559,12 +570,13 @@ node server.js
 | Test Category | Count | Pass Rate | Description |
 |---------------|-------|-----------|-------------|
 | Standard Abbreviations | 10 | 100% | po, qd, bid, tid, etc. |
-| Full Word Variations | 10 | 100% | "by mouth", "twice daily", etc. |
+| Full Word Variations | 10 | 100% | "by mouth", "orally", "twice daily", etc. |
 | Complex Natural Language | 10 | 100% | Verbose instructions |
 | PRN Instructions | 5 | 100% | "as needed" variations |
 | Extended Release | 4 | 100% | XR, SR, CR formulations |
 | Invalid/Malformed | 6 | 100% | Error handling |
 | Edge Cases (Unicode, etc.) | 13 | 100% | Emojis, special chars |
+| Number Words & Fractions | 4 | 100% | "one", "two", "half", "1/2" |
 | Load Test (Sequential) | 1,000 | 100% | Performance under load |
 | Batch Processing | 661 | 100% | Bulk operations |
 | Fuzz Testing | 500 | 100% | Random input resilience |
@@ -729,6 +741,7 @@ docker run -p 3000:3000 medical-sig-parser
 | `SIG_PARSER_OFFLINE` | Disable ML download | false | Air-gapped environments |
 | `SIG_PARSER_MAX_PATTERNS` | Max learned patterns | 1000 | Increase for specialized domains |
 | `SIG_PARSER_AUTO_LEARN` | Auto-learn patterns | true | Disable for static deployments |
+| `CORS_ORIGIN` | Allowed CORS origin(s) | (none) | Set to `*` or specific origin for cross-origin |
 
 ## 🔐 Privacy-First by Design
 
@@ -925,7 +938,37 @@ Contributions welcome! Please read our contributing guidelines and submit PRs.
 
 ## 📄 License
 
-MIT License - see LICENSE file for details
+MIT License - see LICENSE file for details.
+
+---
+
+## Changelog
+
+### 2026-03-29 — Code Review Fixes
+
+**Critical Bug Fixes:**
+- Fixed `server.js` — async `runTest()` was called without `await`, causing all SSE test results to report as failed
+- Fixed `server.js` — static ESM import of WASM wrapper threw before the try/catch, preventing graceful error handling
+- Fixed `sandbox.js` — `setTimeout` in `parseWithFallback` was never cleared on success, leaking timers
+- Fixed `Cargo.toml` — invalid Rust edition `"2024"` changed to `"2021"`
+
+**Parser Grammar Enhancements:**
+- Quantity rule now supports fractions (`1/2`), ranges (`1-2`), and word numbers (`one`, `two`, `half`, etc.)
+- Added `normalize_quantity()` to convert word numbers and fractions to decimal strings
+- Added `orally` and `p.o.` to the route grammar rule
+
+**Medical Data Corrections:**
+- Reclassified acyclovir from Antibiotic to Antiviral (new category added)
+- Removed ranitidine (Zantac) — withdrawn from market in 2020 due to NDMA contamination
+- Removed `po` and `pills` from the misspellings list (both are valid medical terms)
+
+**DRY & Maintenance:**
+- `fhir.rs` — replaced 12-branch hardcoded timing match with `lookup_frequency()` using the frequency database's `fhir_timing` field
+- Removed 5 redundant plural aliases from `DOSAGE_LIMITS` (handled by unit normalization)
+- `pattern-learning.js` — auto-save interval is now properly cleared in `destroy()`
+- `comprehensive-test.js` — full word variation tests now call `validateResult()` instead of always passing
+- `confidence.rs` — score properly clamped to 0-100 (drug name bonus no longer exceeds cap)
+- `server.js` — CORS default changed from wildcard `*` to same-origin (configure via `CORS_ORIGIN` env var)
 
 ---
 

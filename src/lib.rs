@@ -12,25 +12,24 @@
 //! - `modules::confidence` - Confidence scoring algorithms
 //! - `modules::errors` - Error handling and suggestion generation
 
-use wasm_bindgen::prelude::*;
 use pest::Parser;
 use pest_derive::Parser;
 use serde_json::json;
+use wasm_bindgen::prelude::*;
 
 // Module declarations
 mod modules;
 use modules::*;
 
 // Re-export commonly used items for convenience
-use medical_data::{
-    lookup_medication, lookup_route, lookup_unit, lookup_frequency,
-    MedicationCategory, ValidationReport
-};
-use validation::{validate_input, validate_dosage, validate_medication_order};
-use normalization::{normalize_unit, normalize_route, normalize_frequency, normalize_medication};
-use fhir::generate_fhir_output;
-use confidence::{calculate_confidence, get_confidence_level, is_high_confidence};
+use confidence::{calculate_confidence, get_confidence_level};
 use errors::generate_error_message;
+use fhir::generate_fhir_output;
+use medical_data::{
+    lookup_frequency, lookup_medication, lookup_route, lookup_unit, MedicationCategory,
+};
+use normalization::{normalize_frequency, normalize_quantity, normalize_route, normalize_unit};
+use validation::{validate_dosage, validate_input, validate_medication_order};
 
 #[derive(Parser)]
 #[grammar = "sig_grammar.pest"]
@@ -46,17 +45,33 @@ fn extract_sig_components(
 ) {
     for inner_pair in pair.into_inner() {
         match inner_pair.as_rule() {
-            Rule::quantity => {
-                result.insert("quantity".to_string(), json!(inner_pair.as_str()));
+            Rule::quantity
+            | Rule::decimal_quantity
+            | Rule::fractional_quantity
+            | Rule::range_quantity
+            | Rule::word_quantity => {
+                result.insert(
+                    "quantity".to_string(),
+                    json!(normalize_quantity(inner_pair.as_str())),
+                );
             }
             Rule::unit => {
-                result.insert("unit".to_string(), json!(normalize_unit(inner_pair.as_str())));
+                result.insert(
+                    "unit".to_string(),
+                    json!(normalize_unit(inner_pair.as_str())),
+                );
             }
             Rule::route => {
-                result.insert("route".to_string(), json!(normalize_route(inner_pair.as_str())));
+                result.insert(
+                    "route".to_string(),
+                    json!(normalize_route(inner_pair.as_str())),
+                );
             }
             Rule::frequency => {
-                result.insert("frequency".to_string(), json!(normalize_frequency(inner_pair.as_str())));
+                result.insert(
+                    "frequency".to_string(),
+                    json!(normalize_frequency(inner_pair.as_str())),
+                );
             }
             Rule::drug_name => {
                 result.insert("drug_name".to_string(), json!(inner_pair.as_str()));
@@ -120,12 +135,30 @@ fn parse_with_options(input: &str, fhir_format: bool, confidence_threshold: f64)
             }
 
             // Extract values for validation and confidence
-            let quantity: Option<String> = result.get("quantity").and_then(|v| v.as_str()).map(|s| s.to_string());
-            let unit: Option<String> = result.get("unit").and_then(|v| v.as_str()).map(|s| s.to_string());
-            let route: Option<String> = result.get("route").and_then(|v| v.as_str()).map(|s| s.to_string());
-            let frequency: Option<String> = result.get("frequency").and_then(|v| v.as_str()).map(|s| s.to_string());
-            let drug_name: Option<String> = result.get("drug_name").and_then(|v| v.as_str()).map(|s| s.to_string());
-            let duration: Option<String> = result.get("duration").and_then(|v| v.as_str()).map(|s| s.to_string());
+            let quantity: Option<String> = result
+                .get("quantity")
+                .and_then(|v| v.as_str())
+                .map(|s| s.to_string());
+            let unit: Option<String> = result
+                .get("unit")
+                .and_then(|v| v.as_str())
+                .map(|s| s.to_string());
+            let route: Option<String> = result
+                .get("route")
+                .and_then(|v| v.as_str())
+                .map(|s| s.to_string());
+            let frequency: Option<String> = result
+                .get("frequency")
+                .and_then(|v| v.as_str())
+                .map(|s| s.to_string());
+            let drug_name: Option<String> = result
+                .get("drug_name")
+                .and_then(|v| v.as_str())
+                .map(|s| s.to_string());
+            let duration: Option<String> = result
+                .get("duration")
+                .and_then(|v| v.as_str())
+                .map(|s| s.to_string());
 
             // Validate dosage
             let validation = if let Some(ref q) = quantity {
@@ -156,7 +189,15 @@ fn parse_with_options(input: &str, fhir_format: bool, confidence_threshold: f64)
             let requires_review = confidence < confidence_threshold || !validation.is_valid;
 
             // Ensure all expected fields are present
-            let fields = ["quantity", "unit", "route", "frequency", "drug_name", "duration", "indication"];
+            let fields = [
+                "quantity",
+                "unit",
+                "route",
+                "frequency",
+                "drug_name",
+                "duration",
+                "indication",
+            ];
             for key in fields.iter() {
                 if !result.contains_key(*key) {
                     result.insert(key.to_string(), json!(null));
@@ -164,16 +205,23 @@ fn parse_with_options(input: &str, fhir_format: bool, confidence_threshold: f64)
             }
 
             // Add metadata
-            result.insert("success".to_string(), json!(validation.is_valid && confidence >= confidence_threshold));
+            result.insert("success".to_string(), json!(validation.is_valid));
+            result.insert(
+                "meets_threshold".to_string(),
+                json!(confidence >= confidence_threshold),
+            );
             result.insert("confidence".to_string(), json!(confidence));
             result.insert("confidence_level".to_string(), json!(confidence_level));
             result.insert("requires_review".to_string(), json!(requires_review));
-            result.insert("validation".to_string(), json!({
-                "is_valid": validation.is_valid,
-                "warnings": validation.warnings,
-                "errors": validation.errors,
-                "suggestions": validation.suggestions
-            }));
+            result.insert(
+                "validation".to_string(),
+                json!({
+                    "is_valid": validation.is_valid,
+                    "warnings": validation.warnings,
+                    "errors": validation.errors,
+                    "suggestions": validation.suggestions
+                }),
+            );
 
             // Add FHIR format if requested
             if fhir_format {
@@ -227,7 +275,7 @@ fn parse_with_options(input: &str, fhir_format: bool, confidence_threshold: f64)
 /// Parse a single medical instruction
 #[wasm_bindgen]
 pub fn parse_medical_instruction(input: &str) -> String {
-    parse_with_options(input, false, 80.0)  // Default threshold 80%
+    parse_with_options(input, false, 80.0) // Default threshold 80%
 }
 
 /// Parse with custom confidence threshold
@@ -254,7 +302,8 @@ pub fn parse_medical_instructions_batch(inputs: &str) -> String {
         })
         .collect();
 
-    let successful = results.iter()
+    let successful = results
+        .iter()
         .filter(|r| r.get("success").and_then(|v| v.as_bool()).unwrap_or(false))
         .count();
 
@@ -285,8 +334,14 @@ pub fn generate_validation_report(inputs: &str) -> String {
 
         let result = parse_medical_instruction(line);
         if let Ok(parsed) = serde_json::from_str::<serde_json::Value>(&result) {
-            let confidence = parsed.get("confidence").and_then(|v| v.as_f64()).unwrap_or(0.0);
-            let success = parsed.get("success").and_then(|v| v.as_bool()).unwrap_or(false);
+            let confidence = parsed
+                .get("confidence")
+                .and_then(|v| v.as_f64())
+                .unwrap_or(0.0);
+            let success = parsed
+                .get("success")
+                .and_then(|v| v.as_bool())
+                .unwrap_or(false);
 
             if !success {
                 failed += 1;
@@ -348,7 +403,8 @@ pub fn get_all_medications() -> String {
     json!({
         "count": meds.len(),
         "medications": meds
-    }).to_string()
+    })
+    .to_string()
 }
 
 /// Lookup a medication by name (generic or brand)
@@ -363,11 +419,13 @@ pub fn lookup_medication_by_name(name: &str) -> String {
             "typical_dose_range": med.typical_dose_range,
             "category": format!("{:?}", med.category),
             "requires_special_instructions": med.requires_special_instructions,
-        }).to_string(),
+        })
+        .to_string(),
         None => json!({
             "found": false,
             "error": format!("Medication '{}' not found", name)
-        }).to_string()
+        })
+        .to_string(),
     }
 }
 
@@ -390,7 +448,8 @@ pub fn get_all_routes() -> String {
     json!({
         "count": routes.len(),
         "routes": routes
-    }).to_string()
+    })
+    .to_string()
 }
 
 /// Get all units of measurement
@@ -412,7 +471,8 @@ pub fn get_all_units() -> String {
     json!({
         "count": units.len(),
         "units": units
-    }).to_string()
+    })
+    .to_string()
 }
 
 /// Get all frequencies
@@ -433,7 +493,8 @@ pub fn get_all_frequencies() -> String {
     json!({
         "count": freqs.len(),
         "frequencies": freqs
-    }).to_string()
+    })
+    .to_string()
 }
 
 /// Validate a medication order with comprehensive checking
@@ -453,7 +514,8 @@ pub fn validate_medication_order_wasm(
                 "errors": ["Invalid quantity format"],
                 "warnings": [],
                 "suggestions": []
-            }).to_string();
+            })
+            .to_string();
         }
     };
 
@@ -470,7 +532,8 @@ pub fn validate_medication_order_wasm(
         "errors": report.errors,
         "warnings": report.warnings,
         "suggestions": report.suggestions,
-    }).to_string()
+    })
+    .to_string()
 }
 
 /// Get medication statistics
@@ -531,7 +594,7 @@ mod tests {
         let r = parse_medical_instruction("Take 2 capsules by mouth bid");
         assert!(r.contains("\"success\":true"));
         assert!(r.contains("\"quantity\":\"2\""));
-        assert!(r.contains("\"unit\":\"cap\""));  // canonical form is "cap"
+        assert!(r.contains("\"unit\":\"cap\"")); // canonical form is "cap"
         assert!(r.contains("\"route\":\"oral\""));
         assert!(r.contains("\"frequency\":\"twice_daily\""));
     }
@@ -563,18 +626,20 @@ mod tests {
         // Missing frequency: -10, score = 90 (high)
         // With only quantity+unit (no route/freq), score would be 80 (high)
         // Need something with fewer factors for medium confidence
-        let r = parse_medical_instruction("Take 1");  // Just quantity, no unit
-        // This will fail parsing or have very low confidence
+        let r = parse_medical_instruction("Take 1"); // Just quantity, no unit
+                                                     // This will fail parsing or have very low confidence
         assert!(r.contains("\"confidence_level\":\"low\"") || r.contains("\"success\":false"));
     }
 
     #[test]
     fn test_low_confidence() {
         // Empty or minimal input should result in low confidence or parse failure
-        let r = parse_medical_instruction("xyz");  // Invalid input
-        assert!(r.contains("\"confidence_level\":\"low\"") ||
-                r.contains("\"success\":false\"") ||
-                r.contains("\"confidence\":0"));
+        let r = parse_medical_instruction("xyz"); // Invalid input
+        assert!(
+            r.contains("\"confidence_level\":\"low\"")
+                || r.contains("\"success\":false")
+                || r.contains("\"confidence\":0")
+        );
     }
 
     // ── Error Handling ────────────────────────────────────

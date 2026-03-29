@@ -24,17 +24,16 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Load WASM module dynamically
 let wasmModule;
 try {
-  wasmModule = await import('./pkg/medical_data_normalizer.js');
+  wasmModule = await import('./wasm-wrapper.js');
 } catch (err) {
-  console.error('Failed to load WASM module:', err.message);
+  console.error('Failed to load WASM wrapper:', err.message);
   console.error('Make sure to run: wasm-pack build --target nodejs');
   process.exit(1);
 }
 
-const { parse_medical_instruction, parse_medical_instructions_batch } = wasmModule;
+const { parseSingle, parseBatch: wasmParseBatch } = wasmModule;
 
 // ============================================================================
 // CONFIGURATION
@@ -58,7 +57,7 @@ const CONFIG = Object.freeze({
   SSE_KEEPALIVE_INTERVAL_MS: parseInt(process.env.SSE_KEEPALIVE_INTERVAL_MS) || 30000,
 
   // Security
-  CORS_ORIGIN: process.env.CORS_ORIGIN || '*',
+  CORS_ORIGIN: process.env.CORS_ORIGIN || '',
   TRUST_PROXY: process.env.TRUST_PROXY === 'true',
 });
 
@@ -347,10 +346,10 @@ function runTest(testCase, category) {
 
     if (category === 'batch' && testCase.inputs) {
       const batchInput = testCase.inputs.join('\n');
-      result = JSON.parse(parse_medical_instructions_batch(batchInput));
+      result = await wasmParseBatch(batchInput);
       passed = result.successful > 0;
     } else {
-      result = JSON.parse(parse_medical_instruction(testCase.input));
+      result = await parseSingle(testCase.input);
 
       // Check expected values
       if (testCase.expected) {
@@ -416,7 +415,7 @@ async function runCategoryTests(categoryId, res) {
 
   for (let i = 0; i < category.tests; i++) {
     const testCase = testCases[i % testCases.length];
-    const testResult = runTest(testCase, categoryId);
+    const testResult = await runTest(testCase, categoryId);
 
     results.completed++;
     if (testResult.passed) {
@@ -612,13 +611,12 @@ const routes = {
       const body = await parseBody(req);
       const { input } = JSON.parse(body);
 
-      // Pass directly to WASM parser - it handles all validation
-      const result = parse_medical_instruction(input);
+      const result = await parseSingle(input);
       metrics.recordRequest('/api/parse', Date.now() - startTime, 200);
-      sendJSON(res, 200, JSON.parse(result));
+      sendJSON(res, 200, result);
     } catch (err) {
       metrics.recordRequest('/api/parse', Date.now() - startTime, 500);
-      sendJSON(res, 500, { error: err.message });
+      sendJSON(res, 500, { error: CONFIG.NODE_ENV === 'production' ? 'Internal server error' : err.message });
     }
   },
 
@@ -630,14 +628,12 @@ const routes = {
       const body = await parseBody(req);
       const { instructions } = JSON.parse(body);
 
-      // Pass directly to WASM parser - it handles all validation
-      const batchInput = Array.isArray(instructions) ? instructions.join('\n') : instructions;
-      const result = parse_medical_instructions_batch(batchInput);
+      const result = await wasmParseBatch(instructions);
       metrics.recordRequest('/api/parse/batch', Date.now() - startTime, 200);
-      sendJSON(res, 200, JSON.parse(result));
+      sendJSON(res, 200, result);
     } catch (err) {
       metrics.recordRequest('/api/parse/batch', Date.now() - startTime, 500);
-      sendJSON(res, 500, { error: err.message });
+      sendJSON(res, 500, { error: CONFIG.NODE_ENV === 'production' ? 'Internal server error' : err.message });
     }
   },
 
@@ -818,4 +814,5 @@ process.on('uncaughtException', err => {
 
 process.on('unhandledRejection', (reason, promise) => {
   log('error', 'Unhandled rejection', { reason });
+  process.exit(1);
 });

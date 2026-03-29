@@ -6,7 +6,6 @@
 /// Common misspellings and their corrections
 const SUGGESTIONS: &[(&str, &str)] = &[
     ("orl", "oral"),
-    ("po", "by mouth"),
     ("by mout", "by mouth"),
     ("tabl", "tablet"),
     ("tabelt", "tablet"),
@@ -15,7 +14,6 @@ const SUGGESTIONS: &[(&str, &str)] = &[
     ("dailey", "daily"),
     ("bidaily", "twice daily"),
     ("injection", "inject"),
-    ("pills", "tablets"),
     ("pil", "tablet"),
 ];
 
@@ -38,7 +36,10 @@ pub fn generate_error_message(input: &str, error_pos: Option<usize>) -> String {
     } else if !input.chars().any(|c| c.is_ascii_digit()) {
         (
             "Missing quantity. Please include a number (e.g., 'Take 1 tablet...').",
-            vec!["Did you mean: 'Take 1 tab...'?".to_string(), "Did you mean: 'Give 2 capsules...'?".to_string()],
+            vec![
+                "Did you mean: 'Take 1 tab...'?".to_string(),
+                "Did you mean: 'Give 2 capsules...'?".to_string(),
+            ],
         )
     } else if input.len() < 3 {
         (
@@ -56,7 +57,10 @@ pub fn generate_error_message(input: &str, error_pos: Option<usize>) -> String {
         let context_lower = context.to_lowercase();
         for (misspelled, correction) in SUGGESTIONS {
             if context_lower.contains(misspelled) {
-                found_suggestions.push(format!("Did you mean '{}' instead of '{}'?", correction, misspelled));
+                found_suggestions.push(format!(
+                    "Did you mean '{}' instead of '{}'?",
+                    correction, misspelled
+                ));
             }
         }
 
@@ -69,7 +73,8 @@ pub fn generate_error_message(input: &str, error_pos: Option<usize>) -> String {
     if suggestions.is_empty() {
         format!("{} (near: '{}')", message, context)
     } else {
-        format!("{} (near: '{}')\nSuggestions:\n  - {}",
+        format!(
+            "{} (near: '{}')\nSuggestions:\n  - {}",
             message,
             context,
             suggestions.join("\n  - ")

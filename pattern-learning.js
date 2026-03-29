@@ -125,6 +125,8 @@ class PatternLearningEngine extends EventEmitter {
       this._loadAll();
     }
 
+    this._autoSaveInterval = null;
+
     // Setup auto-save
     if (this.config.persistData) {
       this._setupAutoSave();
@@ -161,7 +163,7 @@ class PatternLearningEngine extends EventEmitter {
 
   _setupAutoSave() {
     // Save every 30 seconds if dirty
-    setInterval(() => {
+    this._autoSaveInterval = setInterval(() => {
       if (this._dirty) {
         this._saveAll();
         this._dirty = false;
@@ -331,7 +333,7 @@ class PatternLearningEngine extends EventEmitter {
     const id = this._generatePatternId(input, result);
     const features = this._extractFeatures(input);
 
-    return Object.freeze({
+    return {
       id,
       input: input.toLowerCase().trim(),
       result,
@@ -345,7 +347,7 @@ class PatternLearningEngine extends EventEmitter {
       successRate: 1.0,
       isActive: true,
       adaptations: [],
-    });
+    };
   }
 
   // ============================================================================
@@ -761,6 +763,10 @@ class PatternLearningEngine extends EventEmitter {
   // ============================================================================
 
   destroy() {
+    if (this._autoSaveInterval) {
+      clearInterval(this._autoSaveInterval);
+      this._autoSaveInterval = null;
+    }
     this._saveAll();
     this.removeAllListeners();
     this.patterns.clear();

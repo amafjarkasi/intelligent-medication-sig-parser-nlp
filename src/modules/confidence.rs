@@ -47,8 +47,9 @@ pub fn calculate_confidence(
         score -= 10.0;
     }
 
-    // Drug name present (bonus)
+    // Drug name present (bonus, capped)
     if drug_name.is_some() {
+        factors += 1;
         score += 5.0;
     }
 
@@ -57,14 +58,7 @@ pub fn calculate_confidence(
         score -= 20.0;
     }
 
-    // Clamp to 0-100
-    if score < 0.0 {
-        0.0
-    } else if score > 100.0 {
-        100.0
-    } else {
-        score
-    }
+    score.min(100.0).max(0.0)
 }
 
 /// Check if confidence meets threshold for automatic processing

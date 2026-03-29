@@ -23,6 +23,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { performance } from 'perf_hooks';
+import { parseSingle as wasmParseSingle, parseBatch as wasmParseBatch } from './wasm-wrapper.js';
 
 // Optional: Transformers.js for neural fallback (loaded dynamically)
 let transformers = null;
@@ -263,8 +264,10 @@ function validateInput(input) {
 
   for (const { pattern, name } of dangerousPatterns) {
     if (pattern.test(input)) {
-      logger.warn('Potentially dangerous input pattern detected', { pattern: name });
-      // Don't throw, just warn - the WASM parser should handle this safely
+      throw new ValidationError(
+        `Input contains potentially dangerous pattern: ${name}`,
+        { pattern: name }
+      );
     }
   }
 
@@ -587,8 +590,9 @@ export async function parseWithFallback(input, wasmModule, options = {}) {
   }
 
   // Create timeout promise
+  let timeoutId;
   const timeoutPromise = new Promise((_, reject) => {
-    setTimeout(() => reject(new TimeoutError(
+    timeoutId = setTimeout(() => reject(new TimeoutError(
       `Parse timeout after ${timeoutMs}ms`,
       { input: input.substring(0, 100) }
     )), timeoutMs);
@@ -601,11 +605,13 @@ export async function parseWithFallback(input, wasmModule, options = {}) {
       timeoutPromise,
     ]);
 
+    clearTimeout(timeoutId);
     const totalTime = performance.now() - startTime;
     metrics.recordParse(result, totalTime);
 
     return result;
   } catch (error) {
+    clearTimeout(timeoutId);
     const totalTime = performance.now() - startTime;
     metrics.recordError(error, 'parse_execution');
 
@@ -631,8 +637,8 @@ async function _parseWithFallbackInternal(input, wasmModule) {
 
   try {
     const rustStart = performance.now();
-    const rustResultRaw = wasmModule.parse_medical_instruction(input);
-    rustResult = JSON.parse(rustResultRaw);
+    const rustResultRaw = await wasmParseSingle(input, wasmModule);
+    rustResult = rustResultRaw;
     rustTime = performance.now() - rustStart;
 
     logger.debug('Rust parser result', {
@@ -804,16 +810,14 @@ export async function initializeWasmModule() {
   logger.info('Initializing WASM module');
 
   try {
-    // Verify WASM file exists
-    if (!fs.existsSync(CONFIG.wasmPath)) {
+    if (!fs.existsSync(path.join(__dirname, 'pkg', 'medical_data_normalizer_bg.wasm'))) {
       throw new WasmError(
-        `WASM binary not found at ${CONFIG.wasmPath}. Run: wasm-pack build --target nodejs`,
-        { path: CONFIG.wasmPath }
+        `WASM binary not found. Run: wasm-pack build --target nodejs`,
+        { path: path.join(__dirname, 'pkg') }
       );
     }
 
-    // Import and initialize
-    const wasmModule = await import('./pkg/medical_data_normalizer.js');
+    const wasmModule = await import('./wasm-wrapper.js');
 
     logger.info('WASM module initialized successfully');
 

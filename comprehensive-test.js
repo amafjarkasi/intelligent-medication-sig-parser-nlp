@@ -348,7 +348,7 @@ async function runComprehensiveTests() {
         await runner.runTest(`FullWord: ${testCase.input}`, async () => {
             const result = JSON.parse(wasmModule.parse_medical_instruction(testCase.input));
             runner.recordParserUsage(result.parser_used || 'rust');
-            // Full word variations may fallback to pattern parser
+            validateResult(result, testCase.expected);
         });
     }
     console.log(`  Results: ${EXTENSIVE_TEST_CASES.fullWordVariations.length} tests`);
