@@ -2,6 +2,9 @@
 name = "medical-data-normalizer"
 version = "0.1.0"
 edition = "2021"
+description = "High-performance Rust/WASM parser for clinical medication sig (instructions) with grammar-based parsing, confidence scoring, and FHIR R4 output"
+repository = "https://github.com/amafjarkasi/intelligent-medication-sig-parser-nlp"
+license = "MIT"
 
 [dependencies]
 wasm-bindgen = "0.2"

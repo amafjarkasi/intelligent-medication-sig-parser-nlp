@@ -72,6 +72,7 @@ pub fn is_medium_confidence(confidence: f64) -> bool {
 }
 
 /// Check if confidence is low (manual review required)
+#[allow(dead_code)]
 pub fn is_low_confidence(confidence: f64) -> bool {
     confidence < 50.0
 }

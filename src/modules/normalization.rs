@@ -40,6 +40,7 @@ pub fn normalize_frequency(raw: &str) -> String {
     lower
 }
 
+#[allow(dead_code)]
 pub fn normalize_medication(raw: &str) -> Option<String> {
     let lower = raw.to_lowercase();
 

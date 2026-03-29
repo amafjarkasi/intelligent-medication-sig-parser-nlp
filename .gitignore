@@ -24,6 +24,7 @@ package-lock.json
 # OS
 .DS_Store
 Thumbs.db
+nul
 
 # Logs
 *.log
@@ -43,6 +44,12 @@ coverage/
 
 # Trashed files
 .trash/
+
+# Runtime data (may contain PHI)
+.sig-patterns/
+sandbox_output.txt
+STRESS_TEST_ANALYSIS.md
+stress_test_report.json
 
 # Empty directories (keep this last)
 outputs/

@@ -46,6 +46,7 @@ pub struct Medication {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[allow(dead_code)]
 pub enum MedicationCategory {
     Cardiovascular,
     Endocrine,
@@ -826,7 +827,7 @@ pub static ROUTES: Lazy<HashMap<&'static str, Route>> = Lazy::new(|| {
         "subcutaneous",
         Route {
             canonical: "subcutaneous",
-            abbreviations: &["subq", "sc", "s.c.", "sq", "subcut"],
+            abbreviations: &["subcutaneously", "subq", "sc", "s.c.", "sq", "subcut"],
             description: "Under the skin",
             snomed_ct_code: Some("34206005"),
             requires_site_specification: false,
@@ -1173,10 +1174,10 @@ pub static UNITS: Lazy<HashMap<&'static str, Unit>> = Lazy::new(|| {
     );
 
     units.insert(
-        "supp",
+        "suppository",
         Unit {
-            canonical: "supp",
-            aliases: &["suppository", "suppositories"],
+            canonical: "suppository",
+            aliases: &["supp", "suppositories"],
             unit_type: UnitType::Count,
             typical_range: (1.0, 2.0),
             metric_equivalent: None,
@@ -1298,6 +1299,7 @@ pub fn lookup_unit(name: &str) -> Option<&'static Unit> {
 }
 
 /// Get all unit aliases for a canonical unit
+#[allow(dead_code)]
 pub fn get_unit_aliases(canonical: &str) -> Option<&'static [&'static str]> {
     UNITS.get(canonical).map(|u| u.aliases)
 }
@@ -1339,6 +1341,7 @@ pub static FREQUENCIES: Lazy<HashMap<&'static str, Frequency>> = Lazy::new(|| {
                 "bid",
                 "b.i.d.",
                 "twice daily",
+                "twice a day",
                 "2x daily",
                 "two times daily",
             ],
@@ -1354,7 +1357,13 @@ pub static FREQUENCIES: Lazy<HashMap<&'static str, Frequency>> = Lazy::new(|| {
         "three_times_daily",
         Frequency {
             canonical: "three_times_daily",
-            abbreviations: &["tid", "t.i.d.", "three times daily", "3x daily"],
+            abbreviations: &[
+                "tid",
+                "t.i.d.",
+                "three times daily",
+                "three times a day",
+                "3x daily",
+            ],
             description: "Three times per day",
             times_per_day: 3.0,
             fhir_timing: Some(
@@ -1688,6 +1697,7 @@ pub fn lookup_frequency(name: &str) -> Option<&'static Frequency> {
 // INDICATIONS
 // ============================================================================
 
+#[allow(dead_code)]
 pub static INDICATIONS: &[&'static str] = &[
     "pain",
     "fever",
@@ -1745,6 +1755,7 @@ pub static INDICATIONS: &[&'static str] = &[
 // ============================================================================
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct SpecialInstruction {
     pub keyword: &'static str,
     pub instruction: &'static str,
@@ -1752,12 +1763,14 @@ pub struct SpecialInstruction {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[allow(dead_code)]
 pub enum InstructionPriority {
     Critical,  // Must be followed
     Important, // Should be followed
     Helpful,   // Nice to know
 }
 
+#[allow(dead_code)]
 pub static SPECIAL_INSTRUCTIONS: Lazy<HashMap<&'static str, SpecialInstruction>> =
     Lazy::new(|| {
         let mut instrs = HashMap::new();

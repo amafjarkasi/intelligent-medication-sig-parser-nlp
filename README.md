@@ -45,7 +45,7 @@ Supports abbreviations (`1 tab po bid`), full words (`Take two tablets by mouth 
 
 ## 📊 Test Results & Performance
 
-### ✅ Comprehensive Test Suite (Latest Run: 2026-03-28)
+### ✅ Comprehensive Test Suite (Latest Run: 2026-03-29)
 
 | Metric | Result | Details |
 |--------|--------|---------|
@@ -949,6 +949,7 @@ MIT License - see LICENSE file for details.
 **Critical Bug Fixes:**
 - Fixed `server.js` — async `runTest()` was called without `await`, causing all SSE test results to report as failed
 - Fixed `server.js` — static ESM import of WASM wrapper threw before the try/catch, preventing graceful error handling
+- Fixed `server.js` — `runTest()` used `await` internally but was not declared `async`, causing `SyntaxError` at module load
 - Fixed `sandbox.js` — `setTimeout` in `parseWithFallback` was never cleared on success, leaking timers
 - Fixed `Cargo.toml` — invalid Rust edition `"2024"` changed to `"2021"`
 
@@ -956,6 +957,14 @@ MIT License - see LICENSE file for details.
 - Quantity rule now supports fractions (`1/2`), ranges (`1-2`), and word numbers (`one`, `two`, `half`, etc.)
 - Added `normalize_quantity()` to convert word numbers and fractions to decimal strings
 - Added `orally` and `p.o.` to the route grammar rule
+- Added `subcutaneously` route variant (ordered before `subcutaneous` for correct PEG matching)
+- Added `"twice daily"`, `"twice a day"`, `"three times a day"` to frequency grammar and lookup
+- Added `"every 72 hours"` frequency support with `q72h`/`q72hr` abbreviations
+- Fixed unit canonical: `supp` → `suppository` to match full-word test expectations
+- Added input pre-processing to strip noise words (body parts, devices, prepositions) before parsing
+
+**Compiler Cleanup:**
+- Eliminated all 9 compiler warnings: added `#[allow(dead_code)]` to API-reserved items, removed unused imports
 
 **Medical Data Corrections:**
 - Reclassified acyclovir from Antibiotic to Antiviral (new category added)

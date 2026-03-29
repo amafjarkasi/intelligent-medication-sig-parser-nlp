@@ -35,7 +35,7 @@ decimal_quantity = @{ ASCII_DIGIT+ ~ ("." ~ ASCII_DIGIT+)? }
 
 fractional_quantity = @{ ASCII_DIGIT+ ~ "/" ~ ASCII_DIGIT+ }
 
-range_quantity = @{ decimal_quantity ~ "-" ~ decimal_quantity }
+range_quantity = @{ ASCII_DIGIT+ ~ ("." ~ ASCII_DIGIT+)? ~ "-" ~ ASCII_DIGIT+ ~ ("." ~ ASCII_DIGIT+)? }
 
 word_quantity = @{
     "ten" | "nine" | "eight" | "seven" | "six" | "five" | "four" | "three" | "two" | "one"
@@ -105,7 +105,7 @@ route = @{
     // INTRAMUSCULAR - Abbreviations
   | "i.m." | "im." | "im"
     // SUBCUTANEOUS - Full word first
-  | "subcutaneous" | "subcut"
+  | "subcutaneously" | "subcutaneous" | "subcut"
     // SUBCUTANEOUS - Abbreviations
   | "s.c." | "subq" | "sc" | "sq"
     // SUBLINGUAL - Full word first
@@ -164,11 +164,11 @@ frequency = @{
     // DAILY - Abbreviations
   | "qday" | "q.d." | "qd" | "daily"
     // TWICE DAILY - Multi-word first
-  | "two times daily" | "2x daily"
+    | "twice a day" | "twice daily" | "two times daily" | "2x daily"
     // TWICE DAILY - Abbreviations
   | "b.i.d." | "bid"
     // THREE TIMES DAILY - Multi-word first
-  | "three times daily" | "3x daily"
+    | "three times a day" | "three times daily" | "3x daily"
     // THREE TIMES DAILY - Abbreviations
   | "t.i.d." | "tid"
     // FOUR TIMES DAILY - Multi-word first
@@ -194,7 +194,11 @@ frequency = @{
     // EVERY 24 HOURS - Multi-word first
   | "every 24 hrs" | "every 24 hours"
     // EVERY 24 HOURS - Abbreviations
-  | "q24hr" | "q24h"
+   | "q24hr" | "q24h"
+    // EVERY 72 HOURS - Multi-word first
+  | "every 72 hrs" | "every 72 hours"
+    // EVERY 72 HOURS - Abbreviations
+  | "q72hr" | "q72h"
     // BEDTIME
   | "at bedtime" | "bedtime" | "qhs" | "h.s." | "hs"
     // EVERY OTHER DAY
@@ -248,7 +252,6 @@ filler_word = { "a" | "an" | "me" | "of" | "patient" | "the" | "to" }
 // ============================================================================
 // DRUG NAMES (Optional recognition)
 // ============================================================================
-// Common medications that might appear before the quantity
 
 drug_name = @{
     "acetaminophen"
@@ -279,8 +282,6 @@ drug_name = @{
 // ============================================================================
 // DURATION (Treatment length)
 // ============================================================================
-// Examples: "for 7 days", "× 10 days" (using multiplication sign)
-// NOTE: Using "×" (U+00D7) instead of "x" to avoid ambiguity
 
 duration = @{
     ("for" | "×" | "duration" | "duration:") ~ " "? ~ quantity ~ " "? ~ duration_unit
@@ -296,7 +297,6 @@ duration_unit = @{
 // ============================================================================
 // INDICATION (Purpose of medication)
 // ============================================================================
-// Examples: "for pain", "for headache"
 
 indication = @{
     "for" ~ " " ~ indication_text

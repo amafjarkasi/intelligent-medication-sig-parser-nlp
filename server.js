@@ -336,7 +336,7 @@ function removeClient(res) {
 // TEST RUNNER
 // ============================================================================
 
-function runTest(testCase, category) {
+async function runTest(testCase, category) {
   const startTime = process.hrtime.bigint();
 
   try {

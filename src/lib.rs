@@ -25,9 +25,7 @@ use modules::*;
 use confidence::{calculate_confidence, get_confidence_level};
 use errors::generate_error_message;
 use fhir::generate_fhir_output;
-use medical_data::{
-    lookup_frequency, lookup_medication, lookup_route, lookup_unit, MedicationCategory,
-};
+use medical_data::{lookup_medication, MedicationCategory};
 use normalization::{normalize_frequency, normalize_quantity, normalize_route, normalize_unit};
 use validation::{validate_dosage, validate_input, validate_medication_order};
 
@@ -126,7 +124,38 @@ fn parse_with_options(input: &str, fhir_format: bool, confidence_threshold: f64)
     // Normalize input: lowercase and trim
     let normalized_input = input.trim().to_lowercase();
 
-    match SigParser::parse(Rule::sig_instruction, &normalized_input) {
+    // Pre-process: strip noise words that appear between meaningful components
+    let noise_words = [
+        "from",
+        "into",
+        "in each",
+        "on",
+        "completely",
+        "under",
+        "with",
+        "each",
+        "skin",
+        "nostril",
+        "inhaler",
+    ];
+    let mut cleaned = normalized_input.clone();
+    for word in &noise_words {
+        cleaned = cleaned.replace(&format!(" {} ", word), " ");
+    }
+    // Also strip leading/trailing noise
+    for word in &noise_words {
+        let with_trailing = format!("{} ", word);
+        let with_leading = format!(" {}", word);
+        if cleaned.starts_with(&with_trailing) {
+            cleaned = cleaned[with_trailing.len()..].to_string();
+        }
+        if cleaned.ends_with(&with_leading) {
+            cleaned = cleaned[..cleaned.len() - with_leading.len()].to_string();
+        }
+    }
+    let cleaned = cleaned.trim();
+
+    match SigParser::parse(Rule::sig_instruction, cleaned) {
         Ok(pairs) => {
             let mut result = serde_json::Map::new();
 
