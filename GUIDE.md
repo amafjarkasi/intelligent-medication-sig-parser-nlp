@@ -586,6 +586,52 @@ const match = engine.findBestMatch("Give two capsules at bedtime");
 // }
 ```
 
+#### How Learned Patterns Are Applied (The Flow)
+
+When you call `parse()`, here's exactly how learned patterns get applied:
+
+```javascript
+// The Pattern Learning Application Flow:
+//
+// 1. INPUT: "Give two capsules at bedtime"
+//           ↓
+// 2. EXACT MATCH CHECK (O(1) lookup)
+//    - Hash the input → "a3f7b2d8e9c1"
+//    - Check if hash exists in pattern index
+//    - No exact match found
+//           ↓
+// 3. SIMILARITY SEARCH (findBestMatch)
+//    - Extract features: { hasNumbers: false, hasUnits: true, tokenSignature: "VERB|NUM|UNIT|ROUTE|FREQ" }
+//    - Compare against all learned patterns
+//    - Found: "Give 2 caps PO QHS" with 92% similarity
+//           ↓
+// 4. CONFIDENCE CALCULATION
+//    - Base confidence: 0.95
+//    - Success rate bonus: +0.09 (90% success rate)
+//    - Usage penalty: -0.02 (used 50 times)
+//    - Final confidence: 0.92 (92%)
+//           ↓
+// 5. THRESHOLD CHECK
+//    - Is 0.92 >= 0.85 (similarityThreshold)? YES
+//    - Return pattern result
+//           ↓
+// 6. OUTPUT: { quantity: "2", unit: "cap", route: "oral", frequency: "bedtime", source: "pattern" }
+
+// Code implementation:
+const match = engine.findBestMatch("Give two capsules at bedtime");
+
+// What happens inside findBestMatch():
+// 1. const hash = _hashInput("Give two capsules at bedtime");
+// 2. const exactId = _patternIndex.get(hash); // null - no exact match
+// 3. Search LRU cache first (hot patterns)
+// 4. Search all patterns with similarity scoring
+// 5. _calculateMatchScore() combines:
+//    - Text similarity (Jaccard): 0.85
+//    - Feature similarity: 0.95  
+//    - Success rate bonus: 0.09
+//    - Final score: (0.85 * 0.6) + (0.95 * 0.3) + 0.09 = 0.92
+```
+
 #### Real-World Implementation - EHR Integration
 
 ```javascript
@@ -610,7 +656,7 @@ class SmartMedicationParser {
   async initialize() {
     this.wasmModule = await initializeWasmModule();
     
-    // Load previously learned patterns
+    // Load previously learned patterns from disk
     await this.engine.loadPatterns();
     console.log(`📚 Loaded ${this.engine.getStats().totalPatterns} learned patterns`);
   }
@@ -618,54 +664,83 @@ class SmartMedicationParser {
   async parse(instruction, options = {}) {
     const { allowLearning = true, requireVerification = false } = options;
     
-    // Step 1: Try exact WASM parse (fastest, most reliable)
+    // ============================================================
+    // STEP 1: Try Learned Patterns First (Fastest Path)
+    // ============================================================
+    // This is where previously learned patterns get applied!
+    // The engine searches for similar patterns and returns the result
+    const patternMatch = this.engine.findBestMatch(instruction);
+    
+    if (patternMatch && patternMatch.confidence > 0.85) {
+      // 🎯 PATTERN MATCH FOUND!
+      // The engine found a similar pattern it learned before
+      // and applies that knowledge to parse this new instruction
+      
+      this.emit('pattern:applied', {
+        input: instruction,
+        matchedPattern: patternMatch.pattern.input,
+        similarity: patternMatch.score,
+        confidence: patternMatch.confidence
+      });
+      
+      return {
+        success: true,
+        ...patternMatch.pattern.result,  // ← Apply learned result!
+        confidence: Math.round(patternMatch.confidence * 100),
+        source: 'pattern',               // ← Mark as pattern-based
+        patternId: patternMatch.pattern.id,
+        similarity: patternMatch.score,
+        matchType: patternMatch.score === 1.0 ? 'exact' : 'similar'
+      };
+    }
+    
+    // ============================================================
+    // STEP 2: Try WASM Parser (Grammar-Based)
+    // ============================================================
     const wasmResult = await parseWithFallback(instruction, this.wasmModule);
     
     if (wasmResult.success && wasmResult.confidence === 'high') {
-      // High-confidence WASM parse - learn from it
+      // Learn from this successful WASM parse for future use
       if (allowLearning) {
-        this.engine.learn(instruction, wasmResult, 98);
-        this.stats.learned++;
+        const learned = this.engine.learn(instruction, wasmResult, 98);
+        if (learned) {
+          this.stats.learned++;
+          this.emit('pattern:learned', { 
+            input: instruction, 
+            patternId: learned.id 
+          });
+        }
       }
       return { ...wasmResult, source: 'wasm', learned: true };
     }
     
-    // Step 2: Try pattern matching for variations
-    const patternMatch = this.engine.findBestMatch(instruction);
-    
-    if (patternMatch && patternMatch.confidence > 0.85) {
-      // Strong pattern match found
-      return {
-        success: true,
-        ...patternMatch.parsed,
-        confidence: Math.round(patternMatch.confidence * 100),
-        source: 'pattern',
-        patternId: patternMatch.pattern.id,
-        similarity: patternMatch.score
-      };
-    }
-    
-    // Step 3: Use WASM with fallback (NLP/ML)
+    // ============================================================
+    // STEP 3: Use Fallback with Verification
+    // ============================================================
     this.stats.fallbackUsed++;
-    const fallbackResult = await parseWithFallback(instruction, this.wasmModule);
     
-    if (fallbackResult.success && !requireVerification) {
+    if (wasmResult.success && !requireVerification) {
       // Auto-learn if confidence is high enough
-      if (allowLearning && fallbackResult.confidence === 'high') {
-        this.engine.learn(instruction, fallbackResult, 85);
+      if (allowLearning && wasmResult.confidence === 'high') {
+        this.engine.learn(instruction, wasmResult, 85);
         this.stats.learned++;
       }
-      return { ...fallbackResult, source: 'fallback', needsVerification: requireVerification };
+      return { ...wasmResult, source: 'fallback' };
     }
     
-    // Step 4: Return for manual verification
+    // Return for manual verification
     return {
       success: false,
       error: 'Low confidence parse - requires verification',
-      raw: fallbackResult,
+      raw: wasmResult,
       source: 'unverified',
       needsVerification: true
     };
+  }
+  
+  // Event emitter for monitoring
+  emit(event, data) {
+    console.log(`[${event}]`, data);
   }
 
   // Apply user feedback to improve accuracy
@@ -796,6 +871,180 @@ app.post('/api/feedback', async (req, res) => {
       : 'Feedback applied'
   });
 });
+```
+
+#### Pattern Application Deep Dive
+
+Here's exactly what happens when a learned pattern is applied:
+
+```javascript
+// Example: Pattern gets applied
+const instruction = "Give two capsules at bedtime";
+
+// 1. The engine checks for learned patterns FIRST
+const match = engine.findBestMatch(instruction);
+
+// Inside findBestMatch:
+// ┌─────────────────────────────────────────────────────────┐
+// │  Phase 1: Exact Match (O(1) - Instant)                  │
+// │  Hash("Give two capsules at bedtime") → "a3f7b2d8..."    │
+// │  Check: _patternIndex.has("a3f7b2d8...")? → NO          │
+// └─────────────────────────────────────────────────────────┘
+//                           ↓
+// ┌─────────────────────────────────────────────────────────┐
+// │  Phase 2: Feature Extraction                            │
+// │  Input: "Give two capsules at bedtime"                  │
+// │  Features: {                                            │
+// │    hasNumbers: false,      ← No digits                  │
+// │    hasUnits: true,         ← "capsules" detected        │
+// │    hasRoute: false,        ← No route abbreviation      │
+// │    hasFrequency: true,     ← "bedtime" = QHS            │
+// │    tokenSignature: "VERB|WORD|UNIT|FREQ"                │
+// │    firstToken: "give",                                  │
+// │    lastToken: "bedtime"                                 │
+// │  }                                                      │
+// └─────────────────────────────────────────────────────────┘
+//                           ↓
+// ┌─────────────────────────────────────────────────────────┐
+// │  Phase 3: Similarity Scoring                            │
+// │  Compare against learned pattern:                       │
+// │  "Give 2 caps PO QHS"                                   │
+// │                                                         │
+// │  Text Similarity (Jaccard):                             │
+// │    Tokens A: {give, two, capsules, at, bedtime}         │
+// │    Tokens B: {give, 2, caps, po, qhs}                   │
+// │    Intersection: {give} = 1                             │
+// │    Union: {give, two, capsules, at, bedtime, 2, caps,   │
+// │            po, qhs} = 9                                 │
+// │    Score: 1/9 = 0.11... WAIT!                           │
+// │                                                         │
+// │  Actually, it uses smarter matching:                    │
+// │    - "two" ≈ "2" (numeric equivalence)                  │
+// │    - "capsules" ≈ "caps" (unit normalization)           │
+// │    - "bedtime" ≈ "qhs" (frequency mapping)              │
+// │    - "give" = "give" (exact match)                      │
+// │                                                         │
+// │  Final Text Similarity: 0.85 (85%)                      │
+// └─────────────────────────────────────────────────────────┘
+//                           ↓
+// ┌─────────────────────────────────────────────────────────┐
+// │  Phase 4: Feature Similarity                            │
+// │  Pattern "Give 2 caps PO QHS" features:                 │
+// │    { hasNumbers: true, hasUnits: true,                  │
+// │      hasRoute: true, hasFrequency: true,                │
+// │      tokenSignature: "VERB|NUM|UNIT|ROUTE|FREQ" }       │
+// │                                                         │
+// │  Compare with input features:                           │
+// │    hasNumbers: false vs true → mismatch                 │
+// │    hasUnits: true vs true → match ✓                     │
+// │    hasRoute: false vs true → mismatch                   │
+// │    hasFrequency: true vs true → match ✓                 │
+// │    tokenSignature: similar structure                    │
+// │                                                         │
+// │  Feature Similarity: 0.75 (75%)                         │
+// └─────────────────────────────────────────────────────────┘
+//                           ↓
+// ┌─────────────────────────────────────────────────────────┐
+// │  Phase 5: Success Rate Bonus                            │
+// │  Pattern "Give 2 caps PO QHS" stats:                    │
+// │    - Used 47 times                                      │
+// │    - Successful 45 times                                │
+// │    - Success Rate: 95.7%                                │
+// │                                                         │
+// │  Bonus: 0.957 * 0.1 (weight) = 0.096                    │
+// └─────────────────────────────────────────────────────────┘
+//                           ↓
+// ┌─────────────────────────────────────────────────────────┐
+// │  Phase 6: Final Score Calculation                       │
+// │                                                         │
+// │  weights = { textSimilarity: 0.6, featureSimilarity:    │
+// │              0.3, successRate: 0.1 }                    │
+// │                                                         │
+// │  score = (0.85 * 0.6) + (0.75 * 0.3) + 0.096            │
+// │  score = 0.51 + 0.225 + 0.096                           │
+// │  score = 0.831 (83.1%)                                  │
+// │                                                         │
+// │  Threshold Check: 0.831 >= 0.85? NO → Continue search   │
+// │                                                         │
+// │  [Engine searches more patterns...]                     │
+// │                                                         │
+// │  Found better match: "Take 2 capsules at night"         │
+// │  Score: 0.92 (92%) ✓ ABOVE THRESHOLD                    │
+// └─────────────────────────────────────────────────────────┘
+//                           ↓
+// ┌─────────────────────────────────────────────────────────┐
+// │  Phase 7: Return Match                                  │
+// │  {                                                      │
+// │    pattern: {                                           │
+// │      id: "p8a9s2d3f4",                                  │
+// │      input: "Take 2 capsules at night",                 │
+// │      result: {                                          │
+// │        quantity: "2",                                   │
+// │        unit: "cap",                                     │
+// │        route: "oral",                                   │
+// │        frequency: "bedtime"                             │
+// │      },                                                 │
+// │      confidence: 0.95                                   │
+// │    },                                                   │
+// │    score: 0.92,                                         │
+// │    confidence: 0.92                                     │
+// │  }                                                      │
+// └─────────────────────────────────────────────────────────┘
+
+// The pattern result gets applied:
+const result = {
+  success: true,
+  quantity: "2",           // ← From learned pattern
+  unit: "cap",             // ← From learned pattern  
+  route: "oral",           // ← From learned pattern
+  frequency: "bedtime",    // ← From learned pattern
+  source: "pattern",
+  confidence: 92
+};
+```
+
+#### Pattern Storage & Persistence
+
+Learned patterns are automatically saved and loaded:
+
+```javascript
+// Patterns are stored in: .sig-patterns/learned-patterns.json
+{
+  "patterns": {
+    "a3f7b2d8e9c1": {
+      "id": "a3f7b2d8e9c1",
+      "input": "give 2 caps po qhs",
+      "result": {
+        "quantity": "2",
+        "unit": "cap",
+        "route": "oral",
+        "frequency": "bedtime"
+      },
+      "confidence": 0.95,
+      "features": {
+        "hasNumbers": true,
+        "hasUnits": true,
+        "hasRoute": true,
+        "hasFrequency": true,
+        "tokenSignature": "VERB|NUM|UNIT|ROUTE|FREQ"
+      },
+      "createdAt": 1712345678901,
+      "lastUsed": 1712934567890,
+      "useCount": 47,
+      "successCount": 45,
+      "failureCount": 2,
+      "successRate": 0.957,
+      "isActive": true
+    }
+  },
+  "lastUpdated": 1712934567890,
+  "version": "2.0.0"
+}
+
+// Auto-save happens:
+// - Every 30 seconds (if patterns changed)
+// - On process exit (SIGINT/SIGTERM)
+// - When manually calling engine.savePatterns()
 ```
 
 #### Batch Learning from Historical Data
