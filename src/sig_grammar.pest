@@ -1,29 +1,8 @@
 // Medical Data Normalizer - PEST Grammar
 // ======================================
-//
-// GRAMMAR STYLE GUIDE:
-// 1. ORDER MATTERS: Longer alternatives MUST come before shorter ones
-// 2. MULTI-WORD FIRST: Multi-word phrases before single-word variants
-// 3. PREFIX SAFETY: Avoid tokens that are prefixes of other tokens in the same rule
-// 4. ATOMIC RULES: Use @{...} for tokens that shouldn't have internal whitespace
-// 5. NORMALIZATION: All input is lowercased before parsing
-//
-// Example of correct ordering:
-//   "capsules" | "capsule" | "caps" | "cap"  // Longest to shortest
-//   "by mouth" | "po"                        // Multi-word before single
-
-// ============================================================================
-// WHITESPACE
-// ============================================================================
 
 WHITESPACE = _{ " " | "\t" | "\n" | "\r" }
 
-// ============================================================================
-// CORE COMPONENTS
-// ============================================================================
-
-// Quantity: integer, decimal, fractional, range, or word number
-// Examples: 1, 2.5, 0.5, 1000, 1/2, 1-2, one, two, ten
 quantity = @{
     range_quantity
   | fractional_quantity
@@ -32,200 +11,103 @@ quantity = @{
 }
 
 decimal_quantity = @{ ASCII_DIGIT+ ~ ("." ~ ASCII_DIGIT+)? }
-
 fractional_quantity = @{ ASCII_DIGIT+ ~ "/" ~ ASCII_DIGIT+ }
-
 range_quantity = @{ ASCII_DIGIT+ ~ ("." ~ ASCII_DIGIT+)? ~ "-" ~ ASCII_DIGIT+ ~ ("." ~ ASCII_DIGIT+)? }
-
 word_quantity = @{
     "ten" | "nine" | "eight" | "seven" | "six" | "five" | "four" | "three" | "two" | "one"
     | "half"
 }
 
-// ============================================================================
-// UNITS
-// ============================================================================
-// ORDERING: Longest form first, then shorter variants
-// Examples: "tablets" before "tablet", "tabs" before "tab"
-
 unit = @{
-    // Tablets
     "tablets" | "tablet" | "tabs" | "tab"
-    // Capsules
   | "capsules" | "capsule" | "caps" | "cap"
-    // Volume
   | "milliliters" | "milliliter" | "ml" | "ccs" | "cc"
-    // Weight - milligrams
   | "milligrams" | "milligram" | "mg"
-    // Weight - grams
   | "grams" | "gram" | "g"
-    // Weight - micrograms
   | "micrograms" | "microgram" | "mcg"
-    // Units (insulin, etc.)
   | "units" | "unit"
-    // Inhalation
-  | "inhalations" | "inhalation" | "puffs" | "puff"
-    // Drops
+  | "inhalations" | "inhalation" | "puffs" | "puff" | "inh"
   | "drops" | "drop" | "gtts" | "gtt"
-    // Suppositories
   | "suppositories" | "suppository"
-    // Volume - household
   | "teaspoons" | "teaspoon" | "tsp"
   | "tablespoons" | "tablespoon" | "tbsp"
-    // Patches (transdermal)
   | "patches" | "patch"
-    // Containers
   | "vials" | "vial"
   | "ampules" | "ampule" | "amps" | "amp"
-    // Sprays (nasal, etc.)
   | "sprays" | "spray"
-    // Applicators
   | "applicators" | "applicator"
+  | "application"
 }
 
-// ============================================================================
-// ROUTES OF ADMINISTRATION
-// ============================================================================
-// ORDERING: Multi-word phrases first, then abbreviations
-// SAFETY: "pr" (rectal) must come AFTER longer forms to avoid conflict with "prn"
-
 route = @{
-    // ORAL - Multi-word first
     "by mouth" | "per os" | "under tongue"
-    // ORAL - Full words and variants
   | "orally" | "oral"
-    // ORAL - Abbreviations
   | "p.o." | "po"
-    // INTRAVENOUS - Full word first
   | "intravenous"
-    // INTRAVENOUS - Abbreviations
   | "i.v." | "iv." | "iv"
-    // INTRAMUSCULAR - Full word first
   | "intramuscular"
-    // INTRAMUSCULAR - Abbreviations
   | "i.m." | "im." | "im"
-    // SUBCUTANEOUS - Full word first
   | "subcutaneously" | "subcutaneous" | "subcut"
-    // SUBCUTANEOUS - Abbreviations
   | "s.c." | "subq" | "sc" | "sq"
-    // SUBLINGUAL - Full word first
   | "sublingual"
-    // SUBLINGUAL - Abbreviations
   | "s.l." | "sl"
-    // RECTAL - Multi-word first
   | "per rectum" | "rectally" | "rectal"
-    // RECTAL - Abbreviations (MUST be after longer forms)
   | "p.r." | "pr"
-    // TOPICAL/TRANSDERMAL - Full words first
   | "transdermal" | "topically" | "topical"
-    // TOPICAL/TRANSDERMAL - Abbreviations
   | "td" | "top"
-    // INHALATION - Full words first
   | "nebulizer" | "nebulized" | "inhalation" | "inhaled" | "inhale"
-    // INHALATION - Abbreviations
   | "inh"
-    // OPHTHALMIC - Full words first
   | "ophthalmic" | "eyes" | "eye"
-    // OPHTHALMIC - Abbreviations
   | "ophth" | "ou" | "os" | "od"
-    // ENTERAL (NG tube, G-tube, J-tube) - Multi-word first
   | "nasogastric" | "gastrostomy" | "jejunostomy"
   | "g-tube" | "g tube" | "gtube"
   | "j-tube" | "j tube" | "jtube"
-    // ENTERAL - Abbreviations
   | "ngt" | "ng"
-    // NASAL - Full words first
   | "intranasal" | "nasal" | "nose"
-    // OTIC (ear) - Full words first
   | "auricular" | "otic" | "ears" | "ear"
-    // VAGINAL - Multi-word first
   | "per vagina" | "vaginal"
-    // VAGINAL - Abbreviations
   | "pv"
 }
 
-// ============================================================================
-// FREQUENCIES
-// ============================================================================
-// ORDERING: Multi-word phrases first, then abbreviations
-// SAFETY: "as needed" before "prn" to avoid partial matching issues
-
 frequency = @{
-    // AS NEEDED - Multi-word first (prevents "pr" route conflict)
-    "as necessary" | "as needed"
-    // AS NEEDED - Abbreviations
+    "as necessary" | "as needed" | "as_needed"
   | "p.r.n." | "prn"
-    // ONE TIME - Multi-word first
   | "single dose" | "one time"
-    // ONE TIME - Single word
-  | "immediately" | "statim" | "stat" | "once"
-    // DAILY - Multi-word first
+  | "immediately" | "statim" | "stat"
   | "every day" | "each day"
-    // DAILY - Abbreviations
-  | "qday" | "q.d." | "qd" | "daily"
-    // TWICE DAILY - Multi-word first
-    | "twice a day" | "twice daily" | "two times daily" | "2x daily"
-    // TWICE DAILY - Abbreviations
+  | "once_daily" | "qday" | "q.d." | "qd" | "daily"
+  | "twice_daily" | "twice a day" | "twice daily" | "two times daily" | "2x daily"
   | "b.i.d." | "bid"
-    // THREE TIMES DAILY - Multi-word first
-    | "three times a day" | "three times daily" | "3x daily"
-    // THREE TIMES DAILY - Abbreviations
+  | "three_times_daily" | "three times a day" | "three times daily" | "3x daily"
   | "t.i.d." | "tid"
-    // FOUR TIMES DAILY - Multi-word first
-  | "four times daily" | "4x daily"
-    // FOUR TIMES DAILY - Abbreviations
+  | "four_times_daily" | "four times daily" | "4x daily"
   | "q.i.d." | "qid"
-    // EVERY X HOURS - Multi-word first
-  | "every four hours" | "every 4 hrs" | "every 4 hours"
-    // EVERY X HOURS - Abbreviations
+  | "every_4_hours" | "every four hours" | "every 4 hrs" | "every 4 hours"
   | "q4hours" | "q4hr" | "q4h"
-    // EVERY 6 HOURS - Multi-word first
-  | "every six hours" | "every 6 hrs" | "every 6 hours"
-    // EVERY 6 HOURS - Abbreviations
+  | "every_6_hours" | "every six hours" | "every 6 hrs" | "every 6 hours"
   | "q6hours" | "q6hr" | "q6h"
-    // EVERY 8 HOURS - Multi-word first
-  | "every eight hours" | "every 8 hrs" | "every 8 hours"
-    // EVERY 8 HOURS - Abbreviations
+  | "every_8_hours" | "every eight hours" | "every 8 hrs" | "every 8 hours"
   | "q8hours" | "q8hr" | "q8h"
-    // EVERY 12 HOURS - Multi-word first
-  | "every twelve hours" | "every 12 hrs" | "every 12 hours"
-    // EVERY 12 HOURS - Abbreviations
+  | "every_12_hours" | "every twelve hours" | "every 12 hrs" | "every 12 hours"
   | "q12hours" | "q12hr" | "q12h"
-    // EVERY 24 HOURS - Multi-word first
   | "every 24 hrs" | "every 24 hours"
-    // EVERY 24 HOURS - Abbreviations
-   | "q24hr" | "q24h"
-    // EVERY 72 HOURS - Multi-word first
+  | "q24hr" | "q24h"
   | "every 72 hrs" | "every 72 hours"
-    // EVERY 72 HOURS - Abbreviations
   | "q72hr" | "q72h"
-    // BEDTIME
-  | "at bedtime" | "bedtime" | "qhs" | "h.s." | "hs"
-    // EVERY OTHER DAY
+  | "at_bedtime" | "at bedtime" | "bedtime" | "qhs" | "h.s." | "hs"
   | "every 2nd day" | "every other day" | "q.o.d." | "qod"
-    // WEEKLY - Multi-word first
   | "every week" | "once weekly"
-    // WEEKLY - Abbreviations
   | "qweek" | "qwk" | "weekly"
-    // BIWEEKLY - Multi-word first
   | "every two weeks" | "every 2 weeks"
-    // BIWEEKLY - Abbreviations
   | "biweekly" | "q2wk"
-    // MONTHLY - Multi-word first
   | "every month" | "once monthly"
-    // MONTHLY - Abbreviations
   | "qmonth" | "monthly"
-    // MEAL TIMING
   | "before meals" | "a.c." | "ac"
   | "after meals" | "p.c." | "pc"
-    // TIME OF DAY
   | "every morning" | "q.am." | "qam" | "morning" | "a.m." | "am"
   | "every evening" | "q.p.m." | "qpm" | "evening" | "p.m." | "pm"
+  | "once"
 }
-
-// ============================================================================
-// ACTION WORDS (Optional leading verbs)
-// ============================================================================
 
 optional_word = @{
     "administer"
@@ -241,17 +123,11 @@ optional_word = @{
   | "swallow"
   | "take"
   | "use"
+  | "rub"
+  | "spread"
 }
 
-// ============================================================================
-// FILLER WORDS (Ignored during parsing)
-// ============================================================================
-
 filler_word = { "a" | "an" | "me" | "of" | "patient" | "the" | "to" }
-
-// ============================================================================
-// DRUG NAMES (Optional recognition)
-// ============================================================================
 
 drug_name = @{
     "acetaminophen"
@@ -279,10 +155,6 @@ drug_name = @{
   | "warfarin"
 }
 
-// ============================================================================
-// DURATION (Treatment length)
-// ============================================================================
-
 duration = @{
     ("for" | "×" | "duration" | "duration:") ~ " "? ~ quantity ~ " "? ~ duration_unit
 }
@@ -294,20 +166,11 @@ duration_unit = @{
   | "years" | "year" | "yrs" | "yr"
 }
 
-// ============================================================================
-// INDICATION (Purpose of medication)
-// ============================================================================
-
 indication = @{
     "for" ~ " " ~ indication_text
 }
 
 indication_text = @{ (ASCII_ALPHANUMERIC | " " | "-" | "/")+ }
-
-// ============================================================================
-// MAIN SIG RULE
-// ============================================================================
-// Structure: [action] [filler] [drug] [filler] quantity [unit] [route] [frequency] [duration] [indication]
 
 sig = {
     optional_word? ~
@@ -320,7 +183,7 @@ sig = {
     WHITESPACE* ~
     route? ~
     WHITESPACE* ~
-    frequency? ~
+    frequency* ~
     WHITESPACE* ~
     duration? ~
     WHITESPACE* ~
@@ -328,5 +191,4 @@ sig = {
     EOI
 }
 
-// Entry point for parsing
 sig_instruction = { SOI ~ sig }

@@ -124,6 +124,9 @@ fn parse_with_options(input: &str, fhir_format: bool, confidence_threshold: f64)
     // Normalize input: lowercase and trim
     let normalized_input = input.trim().to_lowercase();
 
+    // Pre-process: apply fuzzy matching normalization before grammar parsing
+    let preprocessed = modules::normalization::preprocess_for_parsing(&normalized_input);
+
     // Pre-process: strip noise words that appear between meaningful components
     let noise_words = [
         "from",
@@ -138,7 +141,7 @@ fn parse_with_options(input: &str, fhir_format: bool, confidence_threshold: f64)
         "nostril",
         "inhaler",
     ];
-    let mut cleaned = normalized_input.clone();
+    let mut cleaned = preprocessed.clone();
     for word in &noise_words {
         cleaned = cleaned.replace(&format!(" {} ", word), " ");
     }
@@ -153,6 +156,29 @@ fn parse_with_options(input: &str, fhir_format: bool, confidence_threshold: f64)
             cleaned = cleaned[..cleaned.len() - with_leading.len()].to_string();
         }
     }
+
+    // Handle topical applications: add implicit "1" if no quantity present
+    let has_number = cleaned.split_whitespace().any(|w| {
+        w.parse::<f64>().is_ok()
+            || [
+                "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
+                "half",
+            ]
+            .contains(&w)
+    });
+
+    let cleaned = if !cleaned.is_empty() && !has_number {
+        // Check if starts with action word and has no number - add "1" for topical applications
+        let action_topical = ["apply", "use", "administer", "rub", "spread", "apply to"];
+        if action_topical.iter().any(|a| cleaned.starts_with(a)) {
+            format!("1 {}", cleaned)
+        } else {
+            cleaned
+        }
+    } else {
+        cleaned
+    };
+
     let cleaned = cleaned.trim();
 
     match SigParser::parse(Rule::sig_instruction, cleaned) {
@@ -172,10 +198,21 @@ fn parse_with_options(input: &str, fhir_format: bool, confidence_threshold: f64)
                 .get("unit")
                 .and_then(|v| v.as_str())
                 .map(|s| s.to_string());
-            let route: Option<String> = result
+            let mut route: Option<String> = result
                 .get("route")
                 .and_then(|v| v.as_str())
                 .map(|s| s.to_string());
+
+            // Default route to "inhalation" if unit is inhalation-related and no route is specified
+            if route.is_none() {
+                if let Some(ref u) = unit {
+                    if u == "inh" || u == "puff" || u == "inhalation" || u == "spray" {
+                        route = Some("inhalation".to_string());
+                        result.insert("route".to_string(), json!("inhalation"));
+                    }
+                }
+            }
+
             let frequency: Option<String> = result
                 .get("frequency")
                 .and_then(|v| v.as_str())
@@ -749,5 +786,17 @@ mod tests {
         let freq = lookup_frequency("bid");
         assert!(freq.is_some());
         assert_eq!(freq.unwrap().canonical, "twice_daily");
+    }
+
+    #[test]
+    fn test_panic() {
+        let _ = parse_medical_instruction("½ tab po qd");
+        let _ = parse_medical_instruction("۸");
+    }
+
+    #[test]
+    fn test_spray_nostril() {
+        let _ = parse_medical_instruction("Use 1 spray in each nostril twice daily");
+        let _ = parse_medical_instruction("1 inh qid");
     }
 }
