@@ -43,3 +43,6 @@ coverage/
 
 # Trashed files
 .trash/
+
+# Empty directories (keep this last)
+outputs/
