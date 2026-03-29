@@ -16,7 +16,7 @@ pub fn calculate_confidence(
         return 0.0;
     }
 
-    let mut score = 100.0;
+    let mut score: f64 = 100.0;
     let mut factors = 0;
 
     // Quantity present (required)

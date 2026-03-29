@@ -5,8 +5,6 @@
 
 use serde_json::json;
 
-use serde_json::json;
-
 /// Generate FHIR R4 Dosage format from parsed components
 pub fn generate_fhir_output(
     quantity: Option<&str>,
