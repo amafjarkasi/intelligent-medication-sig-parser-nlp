@@ -8,7 +8,7 @@
 //! - Unicode normalization, fuzzy matching, misspellings
 
 use crate::modules::medical_data::{
-    lookup_frequency, lookup_medication, lookup_route, lookup_unit,
+    lookup_frequency, lookup_indication, lookup_medication, lookup_route, lookup_unit,
 };
 
 fn normalize_text(raw: &str) -> String {
@@ -139,6 +139,16 @@ pub fn normalize_medication(raw: &str) -> Option<String> {
     }
 
     None
+}
+
+pub fn normalize_indication(raw: &str) -> String {
+    let normalized = normalize_text(raw);
+
+    if let Some(indc) = lookup_indication(&normalized) {
+        return indc.canonical.to_string();
+    }
+
+    normalized
 }
 
 pub fn normalize_quantity(raw: &str) -> String {

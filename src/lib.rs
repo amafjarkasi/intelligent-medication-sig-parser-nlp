@@ -25,8 +25,10 @@ use modules::*;
 use confidence::{calculate_confidence, get_confidence_level};
 use errors::generate_error_message;
 use fhir::generate_fhir_output;
-use medical_data::{lookup_medication, MedicationCategory};
-use normalization::{normalize_frequency, normalize_quantity, normalize_route, normalize_unit};
+use medical_data::{lookup_frequency, lookup_medication, MedicationCategory};
+use normalization::{
+    normalize_frequency, normalize_indication, normalize_quantity, normalize_route, normalize_unit,
+};
 use validation::{validate_dosage, validate_input, validate_medication_order};
 
 #[derive(Parser)]
@@ -36,6 +38,54 @@ struct SigParser;
 // ============================================================================
 // COMPONENT EXTRACTION
 // ============================================================================
+
+fn calculate_total_dispense(
+    qty_str: &str,
+    freq_str: &str,
+    duration_str: Option<&str>,
+) -> Option<f64> {
+    if let Some(dur) = duration_str {
+        let q: f64 = qty_str.parse().ok()?;
+
+        let mut times_per_day = 1.0;
+        if let Some(freq) = lookup_frequency(freq_str) {
+            times_per_day = freq.times_per_day;
+        }
+
+        let dur_lower = dur.to_lowercase();
+        let num_str: String = dur_lower
+            .chars()
+            .filter(|c| c.is_ascii_digit() || *c == '.')
+            .collect();
+        if num_str.is_empty() {
+            return None;
+        }
+
+        let days_multiplier: f64 = if dur_lower.contains("week")
+            || dur_lower.contains("wks")
+            || dur_lower.contains("wk")
+        {
+            7.0
+        } else if dur_lower.contains("month")
+            || dur_lower.contains("mos")
+            || dur_lower.contains("mo")
+        {
+            30.0
+        } else if dur_lower.contains("year")
+            || dur_lower.contains("yrs")
+            || dur_lower.contains("yr")
+        {
+            365.0
+        } else {
+            1.0 // Assume days
+        };
+
+        if let Ok(num) = num_str.parse::<f64>() {
+            return Some((q * times_per_day * num * days_multiplier).ceil());
+        }
+    }
+    None
+}
 
 fn extract_sig_components(
     pair: pest::iterators::Pair<Rule>,
@@ -78,7 +128,16 @@ fn extract_sig_components(
                 result.insert("duration".to_string(), json!(inner_pair.as_str()));
             }
             Rule::indication => {
-                result.insert("indication".to_string(), json!(inner_pair.as_str()));
+                let mut text = inner_pair.as_str();
+                // If it contains inner rules (like indication_text), extract it
+                if let Some(inner) = inner_pair.clone().into_inner().next() {
+                    if inner.as_rule() == Rule::indication_text {
+                        text = inner.as_str();
+                    }
+                } else if text.to_lowercase().starts_with("for ") {
+                    text = &text[4..];
+                }
+                result.insert("indication".to_string(), json!(normalize_indication(text)));
             }
             Rule::sig | Rule::optional_word => {
                 extract_sig_components(inner_pair, result);
@@ -183,13 +242,40 @@ fn parse_with_options(input: &str, fhir_format: bool, confidence_threshold: f64)
 
     match SigParser::parse(Rule::sig_instruction, cleaned) {
         Ok(pairs) => {
-            let mut result = serde_json::Map::new();
+            let mut phases = Vec::new();
 
             for pair in pairs {
-                extract_sig_components(pair, &mut result);
+                if pair.as_rule() == Rule::sig_instruction {
+                    for inner_pair in pair.into_inner() {
+                        if inner_pair.as_rule() == Rule::sig {
+                            let mut phase = serde_json::Map::new();
+                            extract_sig_components(inner_pair, &mut phase);
+                            phases.push(phase);
+                        }
+                    }
+                }
             }
 
-            // Extract values for validation and confidence
+            if phases.is_empty() {
+                // Should not happen with successful parse, but fallback just in case
+                let fallback = serde_json::Map::new();
+                phases.push(fallback);
+            }
+
+            // The top level result will be based on the first phase, inheriting properties
+            let mut result = phases[0].clone();
+
+            // Inherit missing properties across phases (e.g., "1 tab po daily then 2 tabs daily")
+            let first_phase = phases[0].clone();
+            for i in 1..phases.len() {
+                for key in ["unit", "route", "drug_name", "indication"] {
+                    if !phases[i].contains_key(key) && first_phase.contains_key(key) {
+                        phases[i].insert(key.to_string(), first_phase[key].clone());
+                    }
+                }
+            }
+
+            // Extract values for validation and confidence from the first phase
             let quantity: Option<String> = result
                 .get("quantity")
                 .and_then(|v| v.as_str())
@@ -268,6 +354,39 @@ fn parse_with_options(input: &str, fhir_format: bool, confidence_threshold: f64)
                 if !result.contains_key(*key) {
                     result.insert(key.to_string(), json!(null));
                 }
+            }
+
+            // Calculate dispense quantity across all phases
+            let mut total_dispense = 0.0;
+            let mut can_calculate_total = true;
+
+            for phase in &phases {
+                let p_qty = phase.get("quantity").and_then(|v| v.as_str());
+                let p_freq = phase.get("frequency").and_then(|v| v.as_str());
+                let p_dur = phase.get("duration").and_then(|v| v.as_str());
+
+                if let (Some(q), Some(f)) = (p_qty, p_freq) {
+                    if let Some(phase_total) = calculate_total_dispense(q, f, p_dur) {
+                        total_dispense += phase_total;
+                    } else {
+                        can_calculate_total = false;
+                        break;
+                    }
+                } else {
+                    can_calculate_total = false;
+                    break;
+                }
+            }
+
+            if can_calculate_total && !phases.is_empty() {
+                result.insert("total_dispense_quantity".to_string(), json!(total_dispense));
+            } else {
+                result.insert("total_dispense_quantity".to_string(), json!(null));
+            }
+
+            // Add phases array to result if there's more than 1
+            if phases.len() > 1 {
+                result.insert("phases".to_string(), json!(phases));
             }
 
             // Add metadata
@@ -798,5 +917,49 @@ mod tests {
     fn test_spray_nostril() {
         let _ = parse_medical_instruction("Use 1 spray in each nostril twice daily");
         let _ = parse_medical_instruction("1 inh qid");
+    }
+
+    #[test]
+    fn test_indication_normalization() {
+        let r = parse_medical_instruction("Take 1 tab po qd for HTN");
+        println!("{}", r);
+        assert!(r.contains("\"indication\":\"hypertension\""));
+
+        let r = parse_medical_instruction("Take 1 tab po qd for high blood pressure");
+        assert!(r.contains("\"indication\":\"hypertension\""));
+
+        let r = parse_medical_instruction("Take 1 tab po qd for sob");
+        assert!(r.contains("\"indication\":\"shortness of breath\""));
+
+        let r = parse_medical_instruction("Take 1 tab po qd for pain");
+        assert!(r.contains("\"indication\":\"pain\""));
+    }
+
+    #[test]
+    fn test_dispense_calculation() {
+        let r = parse_medical_instruction("Take 1 capsule by mouth three times daily for 14 days");
+        println!("{}", r);
+        assert!(r.contains("\"total_dispense_quantity\":42.0"));
+
+        let r2 = parse_medical_instruction("Inject 2 units subcutaneous daily for 1 month");
+        assert!(r2.contains("\"total_dispense_quantity\":60.0"));
+
+        let r3 = parse_medical_instruction("Take 0.5 tab po bid for 7 wks");
+        assert!(r3.contains("\"total_dispense_quantity\":49.0"));
+    }
+
+    #[test]
+    fn test_compound_sig() {
+        let r = parse_medical_instruction(
+            "Take 2 tabs po daily for 3 days, then 1 tab po daily for 3 days",
+        );
+        println!("{}", r);
+        assert!(r.contains("\"total_dispense_quantity\":9.0"));
+        assert!(r.contains("\"phases\":["));
+
+        // Ensure "quantity" at the top level is the first phase
+        assert!(r.contains("\"quantity\":\"2\""));
+        // Check array
+        assert!(r.contains("\"quantity\":\"1\""));
     }
 }

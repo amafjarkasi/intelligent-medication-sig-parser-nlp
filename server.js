@@ -222,6 +222,9 @@ const TEST_CATEGORIES = Object.freeze([
   { id: 'routes', name: 'Route Variations', tests: 80, icon: '' },
   { id: 'frequencies', name: 'Frequency Patterns', tests: 100, icon: '' },
   { id: 'units', name: 'Unit Normalization', tests: 60, icon: '' },
+  { id: 'compound', name: 'Compound/Titration', tests: 40, icon: '' },
+  { id: 'indications', name: 'Indications', tests: 30, icon: '' },
+  { id: 'dispense', name: 'Auto-Dispense Calc', tests: 40, icon: '' },
   { id: 'edge', name: 'Edge Cases', tests: 120, icon: '' },
   { id: 'confidence', name: 'Confidence Scoring', tests: 90, icon: '' },
   { id: 'validation', name: 'Validation Rules', tests: 70, icon: '' },
@@ -297,6 +300,24 @@ const TEST_CASES = Object.freeze({
   fhir: [
     { input: 'Take 1 tab po qd', expectFhir: true },
     { input: 'Give 500 ml IV BID', expectFhir: true },
+  ],
+  compound: [
+    { input: 'Take 2 tabs po daily for 3 days, then 1 tab po daily for 3 days', expected: { quantity: '2', unit: 'tab', route: 'oral', frequency: 'once_daily', duration: 'for 3 days', total_dispense_quantity: 9 } },
+    { input: 'Take 40mg po daily for 1 week then 20mg po daily for 1 week', expected: { quantity: '40', unit: 'mg', route: 'oral', frequency: 'once_daily', duration: 'for 1 week', total_dispense_quantity: 420 } },
+    { input: 'Inject 10 units subcut once daily then 5 units subcut once daily', expected: { quantity: '10', unit: 'units', route: 'subcutaneous', frequency: 'once_daily', total_dispense_quantity: null } },
+  ],
+  indications: [
+    { input: 'Take 1 tab po qd for htn', expected: { indication: 'hypertension' } },
+    { input: 'Inhale 2 puffs q4h prn sob', expected: { indication: 'shortness of breath' } },
+    { input: 'Take 1 cap po bid for dm2', expected: { indication: 'type 2 diabetes mellitus' } },
+    { input: 'Use 1 spray each nostril daily for allergic rhinitis', expected: { indication: 'allergic rhinitis' } },
+  ],
+  dispense: [
+    { input: 'Take 1 tab po qd for 30 days', expected: { total_dispense_quantity: 30 } },
+    { input: 'Take 1 tab po bid for 1 month', expected: { total_dispense_quantity: 60 } },
+    { input: 'Take 2 tabs po tid for 2 weeks', expected: { total_dispense_quantity: 84 } },
+    { input: 'Take 1 cap po q4h for 7 days', expected: { total_dispense_quantity: 42 } },
+    { input: 'Take 1 tab po qd', expected: { total_dispense_quantity: null } }, // Missing duration
   ],
   stress: [
     { input: 'Take 1 tab po qd', iterations: 1000 },

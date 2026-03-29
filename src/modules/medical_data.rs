@@ -1693,58 +1693,203 @@ pub fn lookup_frequency(name: &str) -> Option<&'static Frequency> {
 // INDICATIONS
 // ============================================================================
 
+#[derive(Debug, Clone)]
 #[allow(dead_code)]
-pub static INDICATIONS: &[&str] = &[
-    "pain",
-    "fever",
-    "inflammation",
-    "infection",
-    "bacteria",
-    "virus",
-    "hypertension",
-    "high blood pressure",
-    "bp",
-    "heart",
-    "diabetes",
-    "blood sugar",
-    "glucose",
-    "cholesterol",
-    "lipids",
-    "anxiety",
-    "depression",
-    "mood",
-    "sleep",
-    "insomnia",
-    "seizure",
-    "epilepsy",
-    "convulsion",
-    "nausea",
-    "vomiting",
-    "upset stomach",
-    "gerd",
-    "reflux",
-    "heartburn",
-    "constipation",
-    "diarrhea",
-    "asthma",
-    "copd",
-    "breathing",
-    "wheezing",
-    "allergies",
-    "allergic",
-    "reaction",
-    "blood clot",
-    "clotting",
-    "inr",
-    "thyroid",
-    "gout",
-    "migraine",
-    "headache",
-    "nerve pain",
-    "neuropathy",
-    "muscle spasm",
-    "spasticity",
-];
+pub struct Indication {
+    pub canonical: &'static str,
+    pub abbreviations: &'static [&'static str],
+}
+
+#[allow(dead_code)]
+pub static INDICATIONS: Lazy<HashMap<&'static str, Indication>> = Lazy::new(|| {
+    let mut indcs = HashMap::new();
+
+    indcs.insert(
+        "hypertension",
+        Indication {
+            canonical: "hypertension",
+            abbreviations: &["htn", "high blood pressure", "high bp", "bp"],
+        },
+    );
+
+    indcs.insert(
+        "pain",
+        Indication {
+            canonical: "pain",
+            abbreviations: &["aches", "soreness", "discomfort"],
+        },
+    );
+
+    indcs.insert(
+        "headache",
+        Indication {
+            canonical: "headache",
+            abbreviations: &["ha", "headaches", "migraine", "migraines"],
+        },
+    );
+
+    indcs.insert(
+        "nausea_and_vomiting",
+        Indication {
+            canonical: "nausea and vomiting",
+            abbreviations: &["n/v", "nausea", "vomiting", "upset stomach"],
+        },
+    );
+
+    indcs.insert(
+        "shortness_of_breath",
+        Indication {
+            canonical: "shortness of breath",
+            abbreviations: &["sob", "breathing", "wheezing", "asthma", "copd"],
+        },
+    );
+
+    indcs.insert(
+        "fever",
+        Indication {
+            canonical: "fever",
+            abbreviations: &["temp", "temperature", "pyrexia"],
+        },
+    );
+
+    indcs.insert(
+        "infection",
+        Indication {
+            canonical: "infection",
+            abbreviations: &["bacteria", "virus"],
+        },
+    );
+
+    indcs.insert(
+        "diabetes",
+        Indication {
+            canonical: "diabetes",
+            abbreviations: &["blood sugar", "glucose", "dm", "dm2", "t2dm"],
+        },
+    );
+
+    indcs.insert(
+        "cholesterol",
+        Indication {
+            canonical: "high cholesterol",
+            abbreviations: &["cholesterol", "lipids", "hyperlipidemia", "hld"],
+        },
+    );
+
+    indcs.insert(
+        "anxiety",
+        Indication {
+            canonical: "anxiety",
+            abbreviations: &["nerves", "panic", "stress", "gad"],
+        },
+    );
+
+    indcs.insert(
+        "depression",
+        Indication {
+            canonical: "depression",
+            abbreviations: &["mood", "sadness", "mdd"],
+        },
+    );
+
+    indcs.insert(
+        "insomnia",
+        Indication {
+            canonical: "insomnia",
+            abbreviations: &["sleep", "trouble sleeping", "sleeplessness"],
+        },
+    );
+
+    indcs.insert(
+        "seizure",
+        Indication {
+            canonical: "seizure",
+            abbreviations: &["seizures", "epilepsy", "convulsion", "convulsions"],
+        },
+    );
+
+    indcs.insert(
+        "gerd",
+        Indication {
+            canonical: "gerd",
+            abbreviations: &["reflux", "heartburn", "acid reflux", "indigestion"],
+        },
+    );
+
+    indcs.insert(
+        "constipation",
+        Indication {
+            canonical: "constipation",
+            abbreviations: &["irregularity"],
+        },
+    );
+
+    indcs.insert(
+        "diarrhea",
+        Indication {
+            canonical: "diarrhea",
+            abbreviations: &["loose stools"],
+        },
+    );
+
+    indcs.insert(
+        "allergic_reaction",
+        Indication {
+            canonical: "allergic reaction",
+            abbreviations: &["allergies", "allergic", "reaction", "hives", "rash"],
+        },
+    );
+
+    indcs.insert(
+        "blood_clot",
+        Indication {
+            canonical: "blood clot",
+            abbreviations: &["clotting", "inr", "dvt", "pe"],
+        },
+    );
+
+    indcs.insert(
+        "gout",
+        Indication {
+            canonical: "gout",
+            abbreviations: &["hyperuricemia"],
+        },
+    );
+
+    indcs.insert(
+        "neuropathy",
+        Indication {
+            canonical: "neuropathy",
+            abbreviations: &["nerve pain", "tingling", "numbness"],
+        },
+    );
+
+    indcs.insert(
+        "muscle_spasm",
+        Indication {
+            canonical: "muscle spasm",
+            abbreviations: &["spasticity", "spasms", "cramps"],
+        },
+    );
+
+    indcs
+});
+
+#[allow(dead_code)]
+pub fn lookup_indication(name: &str) -> Option<&'static Indication> {
+    let lower = name.to_lowercase();
+
+    for (_, indc) in INDICATIONS.iter() {
+        if indc.canonical == lower {
+            return Some(indc);
+        }
+        if indc.abbreviations.iter().any(|&abbr| abbr == lower) {
+            return Some(indc);
+        }
+    }
+
+    None
+}
 
 // ============================================================================
 // SPECIAL INSTRUCTIONS
