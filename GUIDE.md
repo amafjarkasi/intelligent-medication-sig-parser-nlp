@@ -548,22 +548,406 @@ const parseWithAudit = (instruction, userId) => {
 
 ## 🚀 Advanced Features
 
-### 🔮 Predictive Parsing with Pattern Learning
+### 🔮 Self-Learning Pattern Engine - Complete Guide
+
+The Pattern Learning Engine enables your parser to **adapt and improve over time** by learning from successful parses, user feedback, and domain-specific terminology.
+
+#### Basic Usage - Learning from Parses
 
 ```javascript
-const engine = new PatternLearningEngine();
+import { PatternLearningEngine } from './pattern-learning.js';
 
-// Learn from your domain-specific language
-engine.learn("Give 2 caps PO QHS", {
+// Initialize the engine
+const engine = new PatternLearningEngine({
+  autoLearn: true,        // Automatically learn from successful parses
+  maxPatterns: 1000,      // Maximum patterns to store
+  confidenceThreshold: 0.8 // Minimum confidence to learn
+});
+
+// Example 1: Learn from a verified correct parse
+const instruction = "Give 2 caps PO QHS";
+const parsedResult = {
   quantity: "2",
   unit: "cap",
   route: "oral",
   frequency: "bedtime"
-}, 95);
+};
 
-// Now it recognizes variations
+// Teach the engine this pattern
+engine.learn(instruction, parsedResult, 95); // 95% confidence
+
+// Now it recognizes variations automatically
 const match = engine.findBestMatch("Give two capsules at bedtime");
-// Returns: { score: 0.92, pattern: {...} }
+// Returns: { 
+//   score: 0.92, 
+//   pattern: {...},
+//   confidence: 0.94,
+//   parsed: { quantity: "2", unit: "cap", route: "oral", frequency: "bedtime" }
+// }
+```
+
+#### Real-World Implementation - EHR Integration
+
+```javascript
+// services/MedicationParserWithLearning.js
+import { PatternLearningEngine } from './pattern-learning.js';
+import { parseWithFallback, initializeWasmModule } from './sandbox.js';
+
+class SmartMedicationParser {
+  constructor(options = {}) {
+    this.engine = new PatternLearningEngine({
+      autoLearn: true,
+      adaptiveMatching: true,
+      feedbackLoop: true,
+      maxPatterns: 2000,
+      confidenceThreshold: 0.75,
+      ...options
+    });
+    this.wasmModule = null;
+    this.stats = { learned: 0, fallbackUsed: 0, improved: 0 };
+  }
+
+  async initialize() {
+    this.wasmModule = await initializeWasmModule();
+    
+    // Load previously learned patterns
+    await this.engine.loadPatterns();
+    console.log(`📚 Loaded ${this.engine.getStats().totalPatterns} learned patterns`);
+  }
+
+  async parse(instruction, options = {}) {
+    const { allowLearning = true, requireVerification = false } = options;
+    
+    // Step 1: Try exact WASM parse (fastest, most reliable)
+    const wasmResult = await parseWithFallback(instruction, this.wasmModule);
+    
+    if (wasmResult.success && wasmResult.confidence === 'high') {
+      // High-confidence WASM parse - learn from it
+      if (allowLearning) {
+        this.engine.learn(instruction, wasmResult, 98);
+        this.stats.learned++;
+      }
+      return { ...wasmResult, source: 'wasm', learned: true };
+    }
+    
+    // Step 2: Try pattern matching for variations
+    const patternMatch = this.engine.findBestMatch(instruction);
+    
+    if (patternMatch && patternMatch.confidence > 0.85) {
+      // Strong pattern match found
+      return {
+        success: true,
+        ...patternMatch.parsed,
+        confidence: Math.round(patternMatch.confidence * 100),
+        source: 'pattern',
+        patternId: patternMatch.pattern.id,
+        similarity: patternMatch.score
+      };
+    }
+    
+    // Step 3: Use WASM with fallback (NLP/ML)
+    this.stats.fallbackUsed++;
+    const fallbackResult = await parseWithFallback(instruction, this.wasmModule);
+    
+    if (fallbackResult.success && !requireVerification) {
+      // Auto-learn if confidence is high enough
+      if (allowLearning && fallbackResult.confidence === 'high') {
+        this.engine.learn(instruction, fallbackResult, 85);
+        this.stats.learned++;
+      }
+      return { ...fallbackResult, source: 'fallback', needsVerification: requireVerification };
+    }
+    
+    // Step 4: Return for manual verification
+    return {
+      success: false,
+      error: 'Low confidence parse - requires verification',
+      raw: fallbackResult,
+      source: 'unverified',
+      needsVerification: true
+    };
+  }
+
+  // Apply user feedback to improve accuracy
+  async applyFeedback(instruction, wasCorrect, correctResult = null) {
+    if (wasCorrect) {
+      // Positive reinforcement - boost pattern confidence
+      const pattern = this.engine.findBestMatch(instruction);
+      if (pattern) {
+        this.engine.applyFeedback(pattern.pattern.id, true);
+        this.stats.improved++;
+        return { action: 'boosted', patternId: pattern.pattern.id };
+      }
+    } else if (correctResult) {
+      // Learn the correct result
+      this.engine.learn(instruction, correctResult, 100); // 100% verified
+      this.stats.learned++;
+      return { action: 'learned_correct', confidence: 100 };
+    }
+    
+    return { action: 'none' };
+  }
+
+  // Get learning statistics
+  getLearningStats() {
+    return {
+      ...this.stats,
+      engineStats: this.engine.getStats(),
+      improvement: this.calculateImprovement()
+    };
+  }
+
+  calculateImprovement() {
+    const stats = this.engine.getStats();
+    if (stats.totalPatterns === 0) return 0;
+    return ((stats.averageSuccessRate - 0.5) * 100).toFixed(1);
+  }
+
+  // Export learned patterns for backup/sharing
+  exportPatterns() {
+    return this.engine.exportPatterns();
+  }
+
+  // Import patterns from another instance
+  importPatterns(patterns) {
+    return this.engine.importPatterns(patterns);
+  }
+}
+
+// Usage in EHR system
+const parser = new SmartMedicationParser();
+await parser.initialize();
+
+// Parse with automatic learning
+const result = await parser.parse("Take 2 tabs by mouth twice daily");
+console.log(result);
+// { success: true, quantity: "2", unit: "tab", route: "oral", 
+//   frequency: "twice_daily", source: "wasm", learned: true }
+
+// Clinician verifies and provides feedback
+await parser.applyFeedback("Take 2 tabs by mouth twice daily", true);
+
+// Now similar phrases work better
+const similar = await parser.parse("Give two tablets orally BID");
+console.log(similar.source); // 'pattern' - used learned pattern!
+```
+
+#### Feedback Loop Implementation
+
+```javascript
+// components/VerificationInterface.jsx (React)
+function VerificationInterface({ instruction, parsedResult, onFeedback }) {
+  const [isCorrect, setIsCorrect] = useState(null);
+  const [corrections, setCorrections] = useState({});
+
+  const handleSubmit = async () => {
+    if (isCorrect === true) {
+      // Positive feedback - parser was correct
+      await onFeedback(instruction, true);
+    } else if (isCorrect === false) {
+      // Negative feedback - provide correct answer
+      await onFeedback(instruction, false, corrections);
+    }
+  };
+
+  return (
+    <div className="verification-panel">
+      <h3>Verify Parse Result</h3>
+      <p>Original: <strong>{instruction}</strong></p>
+      <p>Parsed: {JSON.stringify(parsedResult)}</p>
+      
+      <div className="feedback-buttons">
+        <button onClick={() => setIsCorrect(true)}>✓ Correct</button>
+        <button onClick={() => setIsCorrect(false)}>✗ Incorrect</button>
+      </div>
+      
+      {isCorrect === false && (
+        <form onSubmit={handleSubmit}>
+          <input 
+            placeholder="Correct quantity" 
+            onChange={e => setCorrections({...corrections, quantity: e.target.value})}
+          />
+          <input 
+            placeholder="Correct frequency" 
+            onChange={e => setCorrections({...corrections, frequency: e.target.value})}
+          />
+          <button type="submit">Submit Correction</button>
+        </form>
+      )}
+    </div>
+  );
+}
+
+// API endpoint for feedback
+app.post('/api/feedback', async (req, res) => {
+  const { instruction, wasCorrect, corrections } = req.body;
+  
+  const result = await parser.applyFeedback(
+    instruction, 
+    wasCorrect, 
+    corrections
+  );
+  
+  res.json({
+    success: true,
+    action: result.action,
+    message: result.action === 'learned_correct' 
+      ? 'Pattern learned successfully' 
+      : 'Feedback applied'
+  });
+});
+```
+
+#### Batch Learning from Historical Data
+
+```javascript
+// scripts/train-from-history.js
+import { PatternLearningEngine } from '../pattern-learning.js';
+import { parseWithFallback, initializeWasmModule } from '../sandbox.js';
+
+async function trainFromHistoricalData(historicalRecords) {
+  const engine = new PatternLearningEngine({ autoLearn: true });
+  const wasmModule = await initializeWasmModule();
+  
+  const stats = { learned: 0, skipped: 0, errors: 0 };
+  
+  for (const record of historicalRecords) {
+    try {
+      // Parse with WASM
+      const result = await parseWithFallback(record.instruction, wasmModule);
+      
+      if (result.success && result.confidence === 'high') {
+        // Cross-reference with verified data if available
+        const isVerified = record.verified || false;
+        const confidence = isVerified ? 100 : 90;
+        
+        engine.learn(record.instruction, result, confidence);
+        stats.learned++;
+        
+        console.log(`✓ Learned: "${record.instruction}"`);
+      } else {
+        stats.skipped++;
+      }
+    } catch (err) {
+      stats.errors++;
+      console.error(`✗ Error: "${record.instruction}" - ${err.message}`);
+    }
+  }
+  
+  // Save learned patterns
+  await engine.savePatterns();
+  
+  console.log('\n📊 Training Complete:');
+  console.log(`  Learned: ${stats.learned}`);
+  console.log(`  Skipped: ${stats.skipped}`);
+  console.log(`  Errors: ${stats.errors}`);
+  
+  return stats;
+}
+
+// Usage
+const historicalData = [
+  { instruction: "Take 1 tab po qd", verified: true },
+  { instruction: "Give 500 mg IV BID", verified: true },
+  // ... thousands more
+];
+
+await trainFromHistoricalData(historicalData);
+```
+
+#### Pattern Analytics & Maintenance
+
+```javascript
+// scripts/analyze-patterns.js
+import { PatternLearningEngine } from '../pattern-learning.js';
+
+async function analyzePatterns() {
+  const engine = new PatternLearningEngine();
+  await engine.loadPatterns();
+  
+  const stats = engine.getStats();
+  
+  console.log('📊 Pattern Analytics');
+  console.log('====================');
+  console.log(`Total Patterns: ${stats.totalPatterns}`);
+  console.log(`Active Patterns: ${stats.activePatterns}`);
+  console.log(`Average Success Rate: ${(stats.averageSuccessRate * 100).toFixed(1)}%`);
+  console.log(`Last Updated: ${stats.lastUpdated}`);
+  
+  // Find underperforming patterns
+  const patterns = engine.getAllPatterns();
+  const lowConfidence = patterns.filter(p => p.successRate < 0.7);
+  
+  console.log(`\n⚠️  Low Confidence Patterns: ${lowConfidence.length}`);
+  lowConfidence.forEach(p => {
+    console.log(`  - "${p.text.substring(0, 50)}..." (${(p.successRate * 100).toFixed(1)}%)`);
+  });
+  
+  // Run maintenance
+  const maintenance = engine.performMaintenance();
+  console.log(`\n🧹 Maintenance Results:`);
+  console.log(`  Deactivated: ${maintenance.deactivated}`);
+  console.log(`  Pruned: ${maintenance.pruned}`);
+  console.log(`  Remaining: ${maintenance.remaining}`);
+}
+
+analyzePatterns();
+```
+
+#### Multi-Tenant Learning (Hospital Systems)
+
+```javascript
+// services/DepartmentalLearning.js
+class DepartmentalLearning {
+  constructor() {
+    this.engines = new Map();
+  }
+  
+  getEngine(departmentId) {
+    if (!this.engines.has(departmentId)) {
+      // Each department has isolated pattern learning
+      this.engines.set(departmentId, new PatternLearningEngine({
+        dataDir: `./patterns/${departmentId}`,
+        autoLearn: true,
+        maxPatterns: 500 // Smaller per-department
+      }));
+    }
+    return this.engines.get(departmentId);
+  }
+  
+  async parseForDepartment(departmentId, instruction) {
+    const engine = this.getEngine(departmentId);
+    
+    // Try department-specific patterns first
+    const deptMatch = engine.findBestMatch(instruction);
+    if (deptMatch?.confidence > 0.8) {
+      return { ...deptMatch, source: 'departmental' };
+    }
+    
+    // Fall back to global patterns
+    // ... parse with global engine
+    
+    // Learn in department context
+    engine.learn(instruction, result, confidence);
+    
+    return result;
+  }
+  
+  // Share patterns across departments (optional)
+  async sharePatterns(fromDept, toDept, minSuccessRate = 0.9) {
+    const sourceEngine = this.getEngine(fromDept);
+    const targetEngine = this.getEngine(toDept);
+    
+    const patterns = sourceEngine.getAllPatterns()
+      .filter(p => p.successRate >= minSuccessRate);
+    
+    for (const pattern of patterns) {
+      targetEngine.learn(pattern.text, pattern.parsed, pattern.confidence);
+    }
+    
+    console.log(`📤 Shared ${patterns.length} patterns from ${fromDept} to ${toDept}`);
+  }
+}
 ```
 
 ### 🌐 Multi-Language Support (Future)

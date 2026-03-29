@@ -269,7 +269,7 @@ console.log(result);
 
 **💡 Perfect for:** Natural language instructions, patient-generated content, legacy data
 
-### 🧠 Pattern Learning Engine
+### 🧠 Pattern Learning Engine - Self-Improving Parser
 
 ```javascript
 import { PatternLearningEngine } from './pattern-learning.js';
@@ -280,7 +280,7 @@ const engine = new PatternLearningEngine({
   confidenceThreshold: 0.8
 });
 
-// Learn from successful parse
+// 1. LEARN - Teach the engine your domain-specific language
 engine.learn("Take 2 tabs po bid", {
   quantity: "2",
   unit: "tab",
@@ -288,20 +288,73 @@ engine.learn("Take 2 tabs po bid", {
   frequency: "twice_daily"
 }, 95);
 
-// Find similar patterns
+// 2. USE - Now it recognizes variations automatically
 const match = engine.findBestMatch("Take 2 tablets by mouth twice daily");
-// { pattern: {...}, score: 0.92, confidence: 0.94 }
+// { pattern: {...}, score: 0.92, confidence: 0.94, parsed: {...} }
 
-// Apply feedback to improve accuracy
-engine.applyFeedback(patternId, true);  // Mark as correct
+// 3. IMPROVE - Apply feedback to boost accuracy
+engine.applyFeedback(patternId, true);  // Positive reinforcement
 engine.applyFeedback(patternId, false); // Mark as incorrect
 
-// Get engine stats
+// 4. ANALYZE - Track improvement over time
 console.log(engine.getStats());
 // { totalPatterns: 150, activePatterns: 142, averageSuccessRate: 0.94 }
 ```
 
-**💡 Perfect for:** Domain-specific terminology, institutional preferences, continuous improvement
+#### Real-World Self-Learning Implementation
+
+```javascript
+// Smart parser that learns from every interaction
+class SmartMedicationParser {
+  constructor() {
+    this.engine = new PatternLearningEngine({ autoLearn: true });
+    this.stats = { learned: 0, improved: 0 };
+  }
+
+  async parse(instruction) {
+    // Try learned patterns first
+    const pattern = this.engine.findBestMatch(instruction);
+    if (pattern?.confidence > 0.85) {
+      return { ...pattern.parsed, source: 'learned' };
+    }
+    
+    // Fall back to WASM parser
+    const result = parse_medical_instruction(instruction);
+    
+    // Auto-learn high-confidence results
+    if (result.confidence > 90) {
+      this.engine.learn(instruction, result, result.confidence);
+      this.stats.learned++;
+    }
+    
+    return result;
+  }
+
+  // Clinician provides feedback
+  async verify(instruction, wasCorrect, correction) {
+    if (wasCorrect) {
+      this.engine.applyFeedback(instruction, true);
+      this.stats.improved++;
+    } else {
+      this.engine.learn(instruction, correction, 100);
+    }
+  }
+}
+
+// Usage
+const parser = new SmartMedicationParser();
+
+// First parse - uses WASM
+await parser.parse("Give 2 caps PO QHS"); // source: 'wasm'
+
+// Similar instruction - uses learned pattern!
+await parser.parse("Give two capsules at bedtime"); // source: 'learned'
+
+// Provide feedback to improve
+await parser.verify("Give 2 caps PO QHS", true); // Boost confidence
+```
+
+**💡 Perfect for:** Domain-specific terminology, institutional preferences, continuous improvement, adapting to clinician writing styles
 
 ## 🔌 Server API (Production)
 
