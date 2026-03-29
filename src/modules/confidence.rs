@@ -58,7 +58,7 @@ pub fn calculate_confidence(
         score -= 20.0;
     }
 
-    score.min(100.0).max(0.0)
+    score.clamp(0.0, 100.0)
 }
 
 /// Check if confidence meets threshold for automatic processing
@@ -68,7 +68,7 @@ pub fn is_high_confidence(confidence: f64) -> bool {
 
 /// Check if confidence is medium (review recommended)
 pub fn is_medium_confidence(confidence: f64) -> bool {
-    confidence >= 50.0 && confidence < 80.0
+    (50.0..80.0).contains(&confidence)
 }
 
 /// Check if confidence is low (manual review required)

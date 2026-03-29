@@ -144,18 +144,18 @@ pub fn validate_dosage(
     if let Some(med_name) = medication {
         if let Some(med) = lookup_medication(med_name) {
             let unit_str = unit.unwrap_or(med.common_unit);
-            if unit_str == med.common_unit {
-                if qty < med.typical_dose_range.0 || qty > med.typical_dose_range.1 {
-                    result.warnings.push(format!(
-                        "{} dose of {} {} is outside typical range ({}-{} {})",
-                        med.generic_name,
-                        qty,
-                        unit_str,
-                        med.typical_dose_range.0,
-                        med.typical_dose_range.1,
-                        med.common_unit
-                    ));
-                }
+            if unit_str == med.common_unit
+                && (qty < med.typical_dose_range.0 || qty > med.typical_dose_range.1)
+            {
+                result.warnings.push(format!(
+                    "{} dose of {} {} is outside typical range ({}-{} {})",
+                    med.generic_name,
+                    qty,
+                    unit_str,
+                    med.typical_dose_range.0,
+                    med.typical_dose_range.1,
+                    med.common_unit
+                ));
             }
 
             if med.requires_special_instructions {
@@ -189,7 +189,7 @@ pub fn validate_dosage(
                     }
                     // Suggest typical dose if far from it
                     let ratio = qty / typical;
-                    if ratio > 10.0 || ratio < 0.1 {
+                    if !(0.1..=10.0).contains(&ratio) {
                         result.suggestions.push(format!(
                             "Typical dose for {} is around {} {}",
                             u, typical, u
@@ -224,18 +224,18 @@ pub fn validate_medication_order(
         if let Some(med) = lookup_medication(med_name) {
             // Check dose range
             let unit_str = unit.unwrap_or(med.common_unit);
-            if unit_str == med.common_unit {
-                if quantity < med.typical_dose_range.0 || quantity > med.typical_dose_range.1 {
-                    report.warnings.push(format!(
-                        "{} dose of {} {} is outside typical range ({}-{} {})",
-                        med.generic_name,
-                        quantity,
-                        unit_str,
-                        med.typical_dose_range.0,
-                        med.typical_dose_range.1,
-                        med.common_unit
-                    ));
-                }
+            if unit_str == med.common_unit
+                && (quantity < med.typical_dose_range.0 || quantity > med.typical_dose_range.1)
+            {
+                report.warnings.push(format!(
+                    "{} dose of {} {} is outside typical range ({}-{} {})",
+                    med.generic_name,
+                    quantity,
+                    unit_str,
+                    med.typical_dose_range.0,
+                    med.typical_dose_range.1,
+                    med.common_unit
+                ));
             }
 
             // Add special instructions if required

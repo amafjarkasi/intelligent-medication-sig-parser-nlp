@@ -77,8 +77,6 @@ pub fn normalize_quantity(raw: &str) -> String {
                     }
                 }
                 lower
-            } else if lower.contains('-') && lower.matches('-').count() == 1 {
-                lower
             } else {
                 lower
             }

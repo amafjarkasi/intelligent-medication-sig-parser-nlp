@@ -765,13 +765,9 @@ pub fn lookup_medication(name: &str) -> Option<&'static Medication> {
     }
 
     // Search brand names
-    for (_, med) in MEDICATIONS.iter() {
-        if med.brand_names.iter().any(|&brand| brand == lower) {
-            return Some(med);
-        }
-    }
-
-    None
+    MEDICATIONS
+        .values()
+        .find(|med| med.brand_names.iter().any(|&brand| brand == lower))
 }
 
 // ============================================================================
@@ -1698,7 +1694,7 @@ pub fn lookup_frequency(name: &str) -> Option<&'static Frequency> {
 // ============================================================================
 
 #[allow(dead_code)]
-pub static INDICATIONS: &[&'static str] = &[
+pub static INDICATIONS: &[&str] = &[
     "pain",
     "fever",
     "inflammation",

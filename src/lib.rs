@@ -416,8 +416,8 @@ pub fn generate_validation_report(inputs: &str) -> String {
 #[wasm_bindgen]
 pub fn get_all_medications() -> String {
     let meds: Vec<serde_json::Value> = medical_data::MEDICATIONS
-        .iter()
-        .map(|(_name, med)| {
+        .values()
+        .map(|med| {
             json!({
                 "generic_name": med.generic_name,
                 "brand_names": med.brand_names,
@@ -462,8 +462,8 @@ pub fn lookup_medication_by_name(name: &str) -> String {
 #[wasm_bindgen]
 pub fn get_all_routes() -> String {
     let routes: Vec<serde_json::Value> = medical_data::ROUTES
-        .iter()
-        .map(|(_name, route)| {
+        .values()
+        .map(|route| {
             json!({
                 "canonical": route.canonical,
                 "abbreviations": route.abbreviations,
@@ -485,8 +485,8 @@ pub fn get_all_routes() -> String {
 #[wasm_bindgen]
 pub fn get_all_units() -> String {
     let units: Vec<serde_json::Value> = medical_data::UNITS
-        .iter()
-        .map(|(_name, unit)| {
+        .values()
+        .map(|unit| {
             json!({
                 "canonical": unit.canonical,
                 "aliases": unit.aliases,
@@ -508,8 +508,8 @@ pub fn get_all_units() -> String {
 #[wasm_bindgen]
 pub fn get_all_frequencies() -> String {
     let freqs: Vec<serde_json::Value> = medical_data::FREQUENCIES
-        .iter()
-        .map(|(_name, freq)| {
+        .values()
+        .map(|freq| {
             json!({
                 "canonical": freq.canonical,
                 "abbreviations": freq.abbreviations,
@@ -602,6 +602,7 @@ pub fn get_medical_data_stats() -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::medical_data::{lookup_frequency, lookup_route, lookup_unit};
 
     // ── Basic Parsing ─────────────────────────────────────
 

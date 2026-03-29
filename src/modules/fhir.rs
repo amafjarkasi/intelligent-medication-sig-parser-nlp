@@ -32,7 +32,7 @@ pub fn generate_fhir_output(
 
     // Timing - use the FHIR timing data from the frequency database
     if let Some(freq) = frequency {
-        let timing = match freq.as_ref() {
+        let timing = match freq {
             "as_needed" => json!({ "asNeededBoolean": true }),
             "at_bedtime" => json!({
                 "repeat": { "when": ["HS"] }
@@ -58,7 +58,7 @@ pub fn generate_fhir_output(
 
     // Route with SNOMED CT coding
     if let Some(r) = route {
-        let route_code = match r.as_ref() {
+        let route_code = match r {
             "oral" => ("26643006", "Oral route"),
             "intravenous" => ("47625008", "Intravenous route"),
             "intramuscular" => ("78421000", "Intramuscular route"),
