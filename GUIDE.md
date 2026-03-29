@@ -692,6 +692,586 @@ parse_medical_instruction("warmup");
 
 ---
 
+## 🌐 Framework Integration Examples
+
+### React
+
+```jsx
+// hooks/useMedicationParser.js
+import { useState, useEffect, useCallback } from 'react';
+import init, { parse_medical_instruction } from '../pkg/medical_data_normalizer.js';
+
+export function useMedicationParser() {
+  const [ready, setReady] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    init().then(() => setReady(true)).catch(setError);
+  }, []);
+
+  const parse = useCallback(async (instruction) => {
+    if (!ready) throw new Error('Parser not initialized');
+    setLoading(true);
+    try {
+      const result = JSON.parse(parse_medical_instruction(instruction));
+      return {
+        ...result,
+        displayText: formatForDisplay(result),
+        schedule: generateSchedule(result)
+      };
+    } finally {
+      setLoading(false);
+    }
+  }, [ready]);
+
+  return { ready, loading, error, parse };
+}
+
+// components/MedicationInput.jsx
+export function MedicationInput({ onParsed }) {
+  const { ready, loading, parse } = useMedicationParser();
+  const [input, setInput] = useState('');
+  const [result, setResult] = useState(null);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const parsed = await parse(input);
+    setResult(parsed);
+    onParsed?.(parsed);
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        placeholder="e.g., Take 1 tab po qd"
+        disabled={!ready}
+      />
+      <button type="submit" disabled={!ready || loading}>
+        {loading ? 'Parsing...' : 'Parse'}
+      </button>
+      {result && <MedicationResult data={result} />}
+    </form>
+  );
+}
+```
+
+### Vue 3 (Composition API)
+
+```vue
+<!-- components/MedicationParser.vue -->
+<template>
+  <div>
+    <input v-model="input" @keyup.enter="parse" placeholder="Enter medication instruction" />
+    <button @click="parse" :disabled="!ready">Parse</button>
+    <div v-if="result" class="result">
+      <p>Quantity: {{ result.quantity }}</p>
+      <p>Frequency: {{ result.frequency }}</p>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted } from 'vue';
+import init, { parse_medical_instruction } from '../pkg/medical_data_normalizer.js';
+
+const input = ref('');
+const result = ref(null);
+const ready = ref(false);
+
+onMounted(async () => {
+  await init();
+  ready.value = true;
+});
+
+const parse = () => {
+  result.value = JSON.parse(parse_medical_instruction(input.value));
+};
+</script>
+```
+
+### Angular
+
+```typescript
+// services/medication-parser.service.ts
+import { Injectable } from '@angular/core';
+import init, { parse_medical_instruction } from '../../../pkg/medical_data_normalizer.js';
+
+@Injectable({ providedIn: 'root' })
+export class MedicationParserService {
+  private initialized = false;
+
+  async initialize(): Promise<void> {
+    if (!this.initialized) {
+      await init();
+      this.initialized = true;
+    }
+  }
+
+  parse(instruction: string): ParsedMedication {
+    if (!this.initialized) throw new Error('Service not initialized');
+    return JSON.parse(parse_medical_instruction(instruction));
+  }
+}
+
+// components/parser/parser.component.ts
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'app-medication-parser',
+  template: `
+    <input [(ngModel)]="input" placeholder="Enter instruction" />
+    <button (click)="parse()" [disabled]="!ready">Parse</button>
+    <pre *ngIf="result">{{ result | json }}</pre>
+  `
+})
+export class MedicationParserComponent implements OnInit {
+  input = '';
+  result: any;
+  ready = false;
+
+  constructor(private parser: MedicationParserService) {}
+
+  async ngOnInit() {
+    await this.parser.initialize();
+    this.ready = true;
+  }
+
+  parse() {
+    this.result = this.parser.parse(this.input);
+  }
+}
+```
+
+### Svelte
+
+```svelte
+<!-- components/MedicationInput.svelte -->
+<script>
+  import { onMount } from 'svelte';
+  import init, { parse_medical_instruction } from '../pkg/medical_data_normalizer.js';
+
+  let input = '';
+  let result = null;
+  let ready = false;
+
+  onMount(async () => {
+    await init();
+    ready = true;
+  });
+
+  function parse() {
+    result = JSON.parse(parse_medical_instruction(input));
+  }
+</script>
+
+<input bind:value={input} placeholder="Enter medication instruction" />
+<button on:click={parse} disabled={!ready}>Parse</button>
+
+{#if result}
+  <div class="result">
+    <p>Quantity: {result.quantity}</p>
+    <p>Unit: {result.unit}</p>
+    <p>Route: {result.route}</p>
+    <p>Frequency: {result.frequency}</p>
+  </div>
+{/if}
+```
+
+### Python (FastAPI)
+
+```python
+# main.py
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+import subprocess
+import json
+
+app = FastAPI(title="Medication Sig Parser API")
+
+class ParseRequest(BaseModel):
+    instruction: str
+
+class ParseResponse(BaseModel):
+    success: bool
+    quantity: str | None
+    unit: str | None
+    route: str | None
+    frequency: str | None
+    confidence: int
+
+@app.post("/parse", response_model=ParseResponse)
+async def parse_medication(request: ParseRequest):
+    """Parse medication instruction using WASM module via Node.js"""
+    try:
+        # Call Node.js wrapper for WASM
+        result = subprocess.run(
+            ["node", "-e", f"""
+                const w = require('./pkg/medical_data_normalizer.js');
+                console.log(w.parse_medical_instruction('{request.instruction}'));
+            """],
+            capture_output=True,
+            text=True,
+            timeout=5
+        )
+        return json.loads(result.stdout)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Alternative: Direct HTTP call to Node.js server
+import httpx
+
+@app.post("/parse-direct")
+async def parse_direct(request: ParseRequest):
+    """Parse via local Node.js server"""
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            "http://localhost:3000/api/parse",
+            json={"input": request.instruction}
+        )
+        return response.json()
+```
+
+### Go
+
+```go
+// parser/client.go
+package parser
+
+import (
+    "bytes"
+    "encoding/json"
+    "net/http"
+    "time"
+)
+
+type Client struct {
+    baseURL string
+    client  *http.Client
+}
+
+type ParseRequest struct {
+    Input string `json:"input"`
+}
+
+type ParseResponse struct {
+    Success   bool   `json:"success"`
+    Quantity  string `json:"quantity"`
+    Unit      string `json:"unit"`
+    Route     string `json:"route"`
+    Frequency string `json:"frequency"`
+    Confidence int   `json:"confidence"`
+}
+
+func NewClient(baseURL string) *Client {
+    return &Client{
+        baseURL: baseURL,
+        client:  &http.Client{Timeout: 10 * time.Second},
+    }
+}
+
+func (c *Client) Parse(instruction string) (*ParseResponse, error) {
+    reqBody, _ := json.Marshal(ParseRequest{Input: instruction})
+    
+    resp, err := c.client.Post(
+        c.baseURL+"/api/parse",
+        "application/json",
+        bytes.NewBuffer(reqBody),
+    )
+    if err != nil {
+        return nil, err
+    }
+    defer resp.Body.Close()
+    
+    var result ParseResponse
+    if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+        return nil, err
+    }
+    return &result, nil
+}
+
+// Usage
+// client := parser.NewClient("http://localhost:3000")
+// result, err := client.Parse("Take 1 tab po qd")
+```
+
+### Ruby (Rails)
+
+```ruby
+# app/services/medication_parser.rb
+require 'net/http'
+require 'json'
+
+class MedicationParser
+  def initialize(base_url = 'http://localhost:3000')
+    @base_url = URI(base_url)
+  end
+
+  def parse(instruction)
+    uri = @base_url.dup
+    uri.path = '/api/parse'
+    
+    req = Net::HTTP::Post.new(uri, 'Content-Type' => 'application/json')
+    req.body = { input: instruction }.to_json
+    
+    res = Net::HTTP.start(uri.hostname, uri.port) do |http|
+      http.request(req)
+    end
+    
+    JSON.parse(res.body, symbolize_names: true)
+  end
+end
+
+# app/controllers/medications_controller.rb
+class MedicationsController < ApplicationController
+  def parse
+    parser = MedicationParser.new
+    result = parser.parse(params[:instruction])
+    render json: result
+  end
+end
+```
+
+### PHP (Laravel)
+
+```php
+<?php
+// app/Services/MedicationParser.php
+namespace App\Services;
+
+use Illuminate\Support\Facades\Http;
+
+class MedicationParser
+{
+    private string $baseUrl;
+    
+    public function __construct(string $baseUrl = 'http://localhost:3000')
+    {
+        $this->baseUrl = $baseUrl;
+    }
+    
+    public function parse(string $instruction): array
+    {
+        $response = Http::post("{$this->baseUrl}/api/parse", [
+            'input' => $instruction
+        ]);
+        
+        return $response->json();
+    }
+}
+
+// app/Http/Controllers/MedicationController.php
+namespace App\Http\Controllers;
+
+use App\Services\MedicationParser;
+use Illuminate\Http\Request;
+
+class MedicationController extends Controller
+{
+    public function parse(Request $request, MedicationParser $parser)
+    {
+        $result = $parser->parse($request->input('instruction'));
+        return response()->json($result);
+    }
+}
+```
+
+### Next.js (API Routes)
+
+```typescript
+// app/api/parse/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+
+export async function POST(request: NextRequest) {
+  const { input } = await request.json();
+  
+  // Call local Node.js parser server
+  const response = await fetch('http://localhost:3000/api/parse', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ input })
+  });
+  
+  const result = await response.json();
+  return NextResponse.json(result);
+}
+
+// app/components/MedicationForm.tsx
+'use client';
+
+import { useState } from 'react';
+
+export default function MedicationForm() {
+  const [input, setInput] = useState('');
+  const [result, setResult] = useState(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const res = await fetch('/api/parse', {
+      method: 'POST',
+      body: JSON.stringify({ input })
+    });
+    setResult(await res.json());
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input value={input} onChange={e => setInput(e.target.value)} />
+      <button type="submit">Parse</button>
+      {result && <pre>{JSON.stringify(result, null, 2)}</pre>}
+    </form>
+  );
+}
+```
+
+### Nuxt.js
+
+```vue
+<!-- components/MedicationParser.vue -->
+<template>
+  <div>
+    <input v-model="input" @keyup.enter="parse" />
+    <button @click="parse">Parse</button>
+    <div v-if="result">
+      <p>Quantity: {{ result.quantity }}</p>
+    </div>
+  </div>
+</template>
+
+<script setup>
+const input = ref('');
+const result = ref(null);
+
+const parse = async () => {
+  const { data } = await useFetch('/api/parse', {
+    method: 'POST',
+    body: { input: input.value }
+  });
+  result.value = data.value;
+};
+</script>
+```
+
+### Express.js Middleware
+
+```javascript
+// middleware/medicationParser.js
+const fetch = require('node-fetch');
+
+const medicationParser = (parserServerUrl = 'http://localhost:3000') => {
+  return async (req, res, next) => {
+    req.parseMedication = async (instruction) => {
+      const response = await fetch(`${parserServerUrl}/api/parse`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ input: instruction })
+      });
+      return response.json();
+    };
+    next();
+  };
+};
+
+module.exports = medicationParser;
+
+// app.js
+const express = require('express');
+const medicationParser = require('./middleware/medicationParser');
+
+const app = express();
+app.use(medicationParser());
+
+app.post('/medications/parse', async (req, res) => {
+  const result = await req.parseMedication(req.body.instruction);
+  res.json(result);
+});
+```
+
+### Django (Python)
+
+```python
+# views.py
+import requests
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+@csrf_exempt
+def parse_medication(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    
+    data = json.loads(request.body)
+    instruction = data.get('instruction')
+    
+    # Call Node.js parser server
+    response = requests.post(
+        'http://localhost:3000/api/parse',
+        json={'input': instruction},
+        timeout=10
+    )
+    
+    return JsonResponse(response.json())
+
+# urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('api/parse/', views.parse_medication, name='parse'),
+]
+```
+
+### Spring Boot (Java)
+
+```java
+// MedicationParserService.java
+@Service
+public class MedicationParserService {
+    private final WebClient webClient;
+    
+    public MedicationParserService(WebClient.Builder webClientBuilder) {
+        this.webClient = webClientBuilder
+            .baseUrl("http://localhost:3000")
+            .build();
+    }
+    
+    public Mono<ParseResult> parse(String instruction) {
+        return webClient.post()
+            .uri("/api/parse")
+            .bodyValue(Map.of("input", instruction))
+            .retrieve()
+            .bodyToMono(ParseResult.class);
+    }
+}
+
+// ParseResult.java
+public record ParseResult(
+    boolean success,
+    String quantity,
+    String unit,
+    String route,
+    String frequency,
+    int confidence
+) {}
+
+// MedicationController.java
+@RestController
+@RequestMapping("/api/medications")
+public class MedicationController {
+    private final MedicationParserService parserService;
+    
+    @PostMapping("/parse")
+    public Mono<ParseResult> parse(@RequestBody ParseRequest request) {
+        return parserService.parse(request.instruction());
+    }
+}
+```
+
+---
+
 ## 📚 Additional Resources
 
 - **API Reference:** See `README.md` for endpoint details

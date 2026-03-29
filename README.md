@@ -648,6 +648,142 @@ docker run -p 3000:3000 medical-sig-parser
 | `SIG_PARSER_MAX_PATTERNS` | Max learned patterns | 1000 | Increase for specialized domains |
 | `SIG_PARSER_AUTO_LEARN` | Auto-learn patterns | true | Disable for static deployments |
 
+## 🌐 Framework Integration
+
+### React Hook
+
+```jsx
+import { useState, useEffect } from 'react';
+import init, { parse_medical_instruction } from './pkg/medical_data_normalizer.js';
+
+function useMedicationParser() {
+  const [ready, setReady] = useState(false);
+  
+  useEffect(() => { init().then(() => setReady(true)); }, []);
+  
+  const parse = (instruction) => {
+    const result = JSON.parse(parse_medical_instruction(instruction));
+    return { ...result, displayText: formatForDisplay(result) };
+  };
+  
+  return { ready, parse };
+}
+```
+
+### Vue 3 Composable
+
+```javascript
+import { ref, onMounted } from 'vue';
+import init, { parse_medical_instruction } from '../pkg/medical_data_normalizer.js';
+
+export function useMedicationParser() {
+  const ready = ref(false);
+  const result = ref(null);
+  
+  onMounted(async () => {
+    await init();
+    ready.value = true;
+  });
+  
+  const parse = (instruction) => {
+    result.value = JSON.parse(parse_medical_instruction(instruction));
+  };
+  
+  return { ready, result, parse };
+}
+```
+
+### Angular Service
+
+```typescript
+@Injectable({ providedIn: 'root' })
+export class MedicationParserService {
+  private initialized = false;
+  
+  async initialize(): Promise<void> {
+    if (!this.initialized) {
+      const init = (await import('../pkg/medical_data_normalizer.js')).default;
+      await init();
+      this.initialized = true;
+    }
+  }
+  
+  parse(instruction: string) {
+    const { parse_medical_instruction } = require('../pkg/medical_data_normalizer.js');
+    return JSON.parse(parse_medical_instruction(instruction));
+  }
+}
+```
+
+### Python (FastAPI)
+
+```python
+from fastapi import FastAPI
+import httpx
+
+app = FastAPI()
+
+@app.post("/parse")
+async def parse_medication(instruction: str):
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            "http://localhost:3000/api/parse",
+            json={"input": instruction}
+        )
+        return response.json()
+```
+
+### Go Client
+
+```go
+type Client struct {
+    baseURL string
+    client  *http.Client
+}
+
+func (c *Client) Parse(instruction string) (*ParseResponse, error) {
+    reqBody, _ := json.Marshal(map[string]string{"input": instruction})
+    resp, err := c.client.Post(
+        c.baseURL+"/api/parse",
+        "application/json",
+        bytes.NewBuffer(reqBody),
+    )
+    // ... handle response
+}
+```
+
+### Ruby
+
+```ruby
+require 'net/http'
+require 'json'
+
+class MedicationParser
+  def initialize(base_url = 'http://localhost:3000')
+    @base_url = URI(base_url)
+  end
+  
+  def parse(instruction)
+    uri = @base_url.dup
+    uri.path = '/api/parse'
+    
+    req = Net::HTTP::Post.new(uri, 'Content-Type' => 'application/json')
+    req.body = { input: instruction }.to_json
+    
+    res = Net::HTTP.start(uri.hostname, uri.port) { |http| http.request(req) }
+    JSON.parse(res.body, symbolize_names: true)
+  end
+end
+```
+
+**See [GUIDE.md](GUIDE.md) for complete framework examples including:**
+- Svelte, Next.js, Nuxt.js
+- Django, Spring Boot, Laravel
+- Express.js middleware patterns
+- Full React/Vue/Angular components
+
+---
+
 ## 📚 Documentation
 
 - **[GUIDE.md](GUIDE.md)** - Comprehensive integration guide with use cases, examples, and best practices
