@@ -1,0 +1,384 @@
+openapi: 3.0.3
+info:
+  title: Intelligent Medication Sig Parser API
+  description: High-performance, privacy-first medication instruction parser. Runs 100% locally via WebAssembly with zero data transmission.
+  version: 2.0.0
+  license:
+    name: MIT
+
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+
+paths:
+  /health:
+    get:
+      summary: Basic health check
+      description: Returns basic service health status for load balancers and monitoring
+      operationId: getHealth
+      tags:
+        - Monitoring
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+                  version:
+                    type: string
+                    example: 2.0.0
+                  timestamp:
+                    type: string
+                    format: date-time
+                  uptime:
+                    type: number
+                    description: Server uptime in seconds
+
+  /health/ready:
+    get:
+      summary: Deep readiness check
+      description: Tests WASM module and parse function for readiness probes (k8s)
+      operationId: getHealthReady
+      tags:
+        - Monitoring
+      responses:
+        '200':
+          description: Service is ready
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [ready, not_ready]
+                  version:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+                  uptime:
+                    type: number
+                  checks:
+                    type: object
+                    properties:
+                      wasm:
+                        type: object
+                        properties:
+                          status:
+                            type: string
+                            enum: [up, down]
+                          name:
+                            type: string
+                          error:
+                            type: string
+                      parse:
+                        type: object
+                        properties:
+                          status:
+                            type: string
+                            enum: [up, down]
+                          name:
+                            type: string
+                          error:
+                            type: string
+        '503':
+          description: Service is not ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthReadyResponse'
+
+  /metrics:
+    get:
+      summary: Performance metrics
+      description: Returns request statistics and performance metrics for observability
+      operationId: getMetrics
+      tags:
+        - Monitoring
+      responses:
+        '200':
+          description: Metrics data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  requests_total:
+                    type: integer
+                  requests_by_endpoint:
+                    type: object
+                  avg_parse_time_ms:
+                    type: string
+                  active_connections:
+                    type: integer
+
+  /api/categories:
+    get:
+      summary: List test categories
+      description: Returns available test categories for the test runner
+      operationId: getCategories
+      tags:
+        - Testing
+      responses:
+        '200':
+          description: List of test categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    tests:
+                      type: integer
+                    icon:
+                      type: string
+
+  /api/parse:
+    post:
+      summary: Parse single instruction
+      description: Parse a single medication instruction into structured data
+      operationId: parseSingle
+      tags:
+        - Parsing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - input
+              properties:
+                input:
+                  type: string
+                  description: Medication instruction (e.g., "Take 1 tab po qd")
+                  example: "Take 1 tab po qd"
+      responses:
+        '200':
+          description: Successful parse
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParseResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/parse/batch:
+    post:
+      summary: Parse batch of instructions
+      description: Parse multiple medication instructions in a single request (2.8x faster)
+      operationId: parseBatch
+      tags:
+        - Parsing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - instructions
+              properties:
+                instructions:
+                  type: array
+                  items:
+                    type: string
+                  description: Array of medication instructions
+                  example: ["Take 1 tab po qd", "Give 500 mg IV BID", "Apply cream topically TID"]
+      responses:
+        '200':
+          description: Batch parse results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchParseResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/tests/run:
+    get:
+      summary: Run all tests (SSE)
+      description: Execute the full test suite with real-time Server-Sent Events updates
+      operationId: runTests
+      tags:
+        - Testing
+      responses:
+        '200':
+          description: SSE stream of test results
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                format: event-stream
+
+  /api/tests/category/{id}:
+    get:
+      summary: Run category tests (SSE)
+      description: Execute tests for a specific category with real-time SSE updates
+      operationId: runCategoryTests
+      tags:
+        - Testing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Test category ID
+          schema:
+            type: string
+          example: standard
+      responses:
+        '200':
+          description: SSE stream of test results
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                format: event-stream
+
+components:
+  schemas:
+    ParseResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        quantity:
+          type: string
+        unit:
+          type: string
+        route:
+          type: string
+        frequency:
+          type: string
+        confidence:
+          type: integer
+        validation:
+          type: object
+          properties:
+            valid:
+              type: boolean
+            errors:
+              type: array
+              items:
+                type: string
+            warnings:
+              type: array
+              items:
+                type: string
+      example:
+        success: true
+        quantity: "1"
+        unit: "tab"
+        route: "oral"
+        frequency: "once_daily"
+        confidence: 100
+        validation:
+          valid: true
+          errors: []
+          warnings: []
+
+    BatchParseResponse:
+      type: object
+      properties:
+        total:
+          type: integer
+        successful:
+          type: integer
+        failed:
+          type: integer
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ParseResponse'
+      example:
+        total: 3
+        successful: 3
+        failed: 0
+        results:
+          - success: true
+            quantity: "1"
+            unit: "tab"
+            route: "oral"
+            frequency: "once_daily"
+            confidence: 100
+            validation:
+              valid: true
+              errors: []
+              warnings: []
+          - success: true
+            quantity: "500"
+            unit: "mg"
+            route: "intravenous"
+            frequency: "twice_daily"
+            confidence: 100
+            validation:
+              valid: true
+              errors: []
+              warnings: []
+          - success: true
+            quantity: "1"
+            unit: "application"
+            route: "topical"
+            frequency: "three_times_daily"
+            confidence: 100
+            validation:
+              valid: true
+              errors: []
+              warnings: []
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      example:
+        error: "Missing or invalid input field"
+
+    HealthReadyResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [not_ready]
+        version:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        uptime:
+          type: number
+        checks:
+          type: object
+
+  securitySchemes: {}

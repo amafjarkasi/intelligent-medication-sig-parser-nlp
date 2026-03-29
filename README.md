@@ -415,7 +415,8 @@ NODE_ENV=production node server.js
 
 | Endpoint | Method | Description | Use Case |
 |----------|--------|-------------|----------|
-| `/health` | GET | Health check | Load balancers, monitoring |
+| `/health` | GET | Basic health check | Load balancers, monitoring |
+| `/health/ready` | GET | Deep readiness check (tests WASM) | k8s readiness probes |
 | `/metrics` | GET | Performance metrics | Observability, dashboards |
 | `/api/parse` | POST | Parse single instruction | Real-time apps |
 | `/api/parse/batch` | POST | Parse multiple instructions | Bulk processing |
@@ -936,6 +937,28 @@ end
 ## 📚 Documentation
 
 - **[GUIDE.md](GUIDE.md)** - Comprehensive integration guide with use cases, examples, and best practices
+- **[openapi.yaml](openapi.yaml)** - OpenAPI 3.0 specification for the REST API (import into Swagger UI, Postman, or Redoc)
+
+### OpenAPI / Swagger
+
+Import `openapi.yaml` into your API tool:
+
+```bash
+# Swagger UI (local)
+npx swagger-ui-express -f openapi.yaml
+
+# Or view online: https://editor.swagger.io/
+```
+
+### OpenAPI Consumer Examples
+
+```javascript
+// Generated client usage
+import { MedSigParser } from './generated/client';
+
+const client = new MedSigParser({ baseUrl: 'http://localhost:3000' });
+const result = await client.parse({ input: 'Take 1 tab po qd' });
+```
 
 ## 🤝 Contributing
 
